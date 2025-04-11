@@ -27,16 +27,23 @@
 }
 
 :root {
+    --wrapper-size: 210px; 
     --top-page-margin: 100px;
-    --page-margin: 5%; /* Dynamic margin for left and right of the page */
-    --sidebar-width: 300px; /* Fixed width for the sidebar */
-    --gap-between: 20px; /* Space between the sidebar and content */
+    --page-margin: 8%; 
+    --sidebar-width: 300px; 
+    --gap-between: 20px; 
+    --primary-blue: #3a496e; 
+    --primary-yellow: #eebe00; 
+    --secondary-slate: #2c3e50; 
+    --text-slate: #9b9b9b; 
+    --text-light: #f0f0f0; 
+    --divider-slate: #4b5563; 
+    --hover-blue: #4b5a7a; 
 }
 
 body {
     font-family: 'Space Mono', sans-serif;
     line-height: 1.5;
-    color: #333;
 }
 
 .container {
@@ -44,28 +51,27 @@ body {
     flex-direction: row;
     justify-content: flex-start;
     gap: var(--gap-between);
-    padding: 0 var(--page-margin);
 }
 
 .sidebar {
     position: fixed;
     top: var(--top-page-margin);
-    left: var(--page-margin); /* Dynamic left margin */
+    left: var(--page-margin); 
     height: 100%;
     width: var(--sidebar-width);
     padding: 20px;
-    background-color: #00001d;
+    background-color: #00000000;
     color: #9b9b9b;
     overflow-y: auto;
 }
 
 .content {
     margin-top: var(--top-page-margin);
-    margin-left: calc(var(--sidebar-width) + var(--gap-between) + var(--page-margin)); /* Sidebar width + gap + left margin */
+    margin-left: calc(var(--sidebar-width) + var(--gap-between) + var(--page-margin)); 
     padding: 20px;
     flex: 1;
-    max-width: calc(100% - var(--sidebar-width) - var(--gap-between) - (2 * var(--page-margin))); /* Adjust content width dynamically */
-}
+    max-width: calc(100% - var(--sidebar-width) - var(--gap-between) - (1 * var(--page-margin))); 
+    }
 
 @media (max-width: 768px) {
     .container {
@@ -87,6 +93,7 @@ body {
 }
 
 h1 {
+    color: var(--text-slate);
     margin-top: 0;
     margin-bottom: 15px;
     font-size: 16px;
@@ -130,7 +137,7 @@ img {
 }
 
 .logo-text {
-    color: #f0f0f0;
+    color: var(--text-light);
     font-family: 'Space Mono', sans-serif;
     font-size: 40px;
     font-weight: 700;
@@ -158,14 +165,14 @@ img {
 }
 
 .social-icon-link {
-    opacity: 0.41;
+    opacity: 0.6;
     width: 19px;
     margin-right: 11px;
     transition: opacity 0.2s;
 }
 
 .social-icon-link:hover {
-    opacity: 0.8;
+    opacity: 1;
 }
 
 .inactivesection {
@@ -191,47 +198,31 @@ img {
     margin-bottom: 0;
 }
 
-.post-info-wrapper {
-    margin-top: 10px;
-    margin-bottom: 10px;
-    font-size: 10px;
-}
-
 .skill-wrapper {
-    float: left;
-    color: #fff100;
+    display: flex;
+    flex-direction: row; 
+    justify-content: flex-start; 
+    gap: 10px; 
+    flex-wrap: wrap; 
+    color: var(--primary-yellow);
     text-align: left;
-    background-color: #00001d;
     border-radius: 20px;
-    flex-flow: row;
-    align-items: stretch;
-    margin-left: auto;
-    margin-right: auto;
-    display: block;
-    position: static;
-    overflow: visible;
+    margin-left: 0; 
+    margin-right: 0;
+    padding: 10px; 
 }
 
 .company {
     display: block;
     font-size: 16px;
     font-weight: bold;
-    color: #eebe00;
-    margin-bottom: 0px;
+    color: var(--primary-yellow);
+    margin-bottom: -5px;
     font-family: 'Space Mono', sans-serif;
 }
 
-.date {
-    color: #969696;
-    align-items: stretch;
-    padding-right: 40px;
-    font-size: 16px;
-    font-weight: 400;
-    display: inline-block;
-}
-
 .summary {
-    color: #9b9b9b;
+    color: var(--text-slate);
     margin-right: 8px;
     padding-bottom: 10px;
     font-family: 'Space Mono', sans-serif;
@@ -240,8 +231,8 @@ img {
 }
 
 .skill {
-    color: #b58d00;
-    background-color: #3a496e;
+    color: var(--primary-yellow);
+    background-color: var(--primary-blue);
     border-radius: 20px;
     padding-left: 20px;
     padding-right: 20px;
@@ -259,6 +250,7 @@ img {
 .info {
     display: inline-block;
     color: #f0f0f0;
+    margin-bottom: 5px;
     font-family: 'Space Mono', sans-serif;
     font-weight: 400;
 }
@@ -275,7 +267,7 @@ img {
 }
 
 .experience-wrapper:hover {
-    background-color: #3a496e;
+    background-color: var(--hover-blue);
 }
 
 .date-wrapper {
@@ -286,12 +278,15 @@ img {
     align-items: flex-start;
     font-family: 'Space Mono', sans-serif;
     display: flex;
-}
+    width: var(--wrapper-size); 
+    height: var(--wrapper-size);
+    overflow: hidden; 
+    border-radius: 8px; 
+    }
 
 .job-detail-wrapper {
     display: flex;
     flex-direction: column;
-    gap: 10px;
     align-items: flex-start;
     width: 100%;
 }
@@ -306,7 +301,7 @@ img {
     aspect-ratio: auto;
     text-align: left;
     object-fit: fill;
-    background-color: #00001d;
+    background-color: var(--secondary-slate);
     flex-flow: row;
     grid-template-rows: auto;
     grid-template-columns: 1fr;
@@ -330,8 +325,7 @@ img {
 }
 
 .divider2 {
-    color: #ebebeb;
-    background-color: #969696;
+    background-color: var(--divider-slate);
     width: 15%;
     height: 1px;
     margin-top: 20px;
@@ -340,8 +334,8 @@ img {
 }
 
 .divider2.active {
-    background-color: #eebe00;
-    width: 30%;
+    background-color: var(--primary-yellow); 
+    width: 30%; 
 }
 
 .active-section {
@@ -385,16 +379,16 @@ img {
 }
 
 .project-wrapper:hover {
-    background-color: #3a496e;
+    background-color: var(--hover-blue);
 }
 
 .image-wrapper {
     flex: none;
-    width: 150px;
-    height: 150px;
+    width: var(--wrapper-size); 
+    height: var(--wrapper-size);
     overflow: hidden;
     border-radius: 8px;
-}
+    }
 
 .project-image {
     width: 100%;
@@ -413,19 +407,19 @@ img {
 .project-title {
     font-size: 16px;
     font-weight: bold;
-    color: #eebe00;
+    color: var(--primary-yellow);
     margin-bottom: 5px;
     font-family: 'Space Mono', sans-serif;
 }
 
 .summary {
-    color: #9b9b9b;
+    color: var(--text-slate);
     font-family: 'Space Mono', sans-serif;
     font-size: 14px;
 }
 
 .nav-link {
-    color: #969696;
+    color: var(--text-slate);
     letter-spacing: 0.5px;
     text-transform: uppercase;
     margin-top: 4px;
@@ -434,11 +428,12 @@ img {
     font-size: 12px;
     font-weight: 600;
     text-decoration: none;
-    transition: color 0.3s ease, border-color 0.3s ease;
+    transition: color 0.3s ease, margin-left 0.3s ease;
     display: block;
 }
 
-.nav-link.active {
-    color: #eebe00;
-    margin-left: 20px;
+.nav-link.active,
+.nav-link:hover {
+    color: var(--primary-yellow); 
+    margin-left: 20px; 
 }
