@@ -330,6 +330,15 @@ img {
 
 .div-block-7 {
     display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    transition: color 0.3s ease, margin-left 0.3s ease;
+}
+
+.div-block-7:hover .nav-link {
+    color: var(--highlight);
+    margin-left: 20px;
 }
 
 .divider2 {

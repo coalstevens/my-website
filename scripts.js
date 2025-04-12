@@ -61,29 +61,28 @@ document.addEventListener("DOMContentLoaded", () => {
         const resumeSection = document.getElementById("Resume");
         const projectsSection = document.getElementById("Projects");
 
-        const aboutLink = document.querySelector('.nav-link[data-section="AboutMe"]');
-        const resumeLink = document.querySelector('.nav-link[data-section="Resume"]');
-        const projectsLink = document.querySelector('.nav-link[data-section="Projects"]');
-
-        const aboutDivider = aboutLink.previousElementSibling;
-        const resumeDivider = resumeLink.previousElementSibling;
-        const projectsDivider = projectsLink.previousElementSibling;
+        const aboutDiv = document.querySelector('.div-block-7 .nav-link[data-section="AboutMe"]').parentElement;
+        const resumeDiv = document.querySelector('.div-block-7 .nav-link[data-section="Resume"]').parentElement;
+        const projectsDiv = document.querySelector('.div-block-7 .nav-link[data-section="Projects"]').parentElement;
 
         const aboutEnd = resumeSection.offsetTop;
         const resumeEnd = projectsSection.offsetTop;
 
-        [aboutLink, resumeLink, projectsLink].forEach((link) => link.classList.remove("active"));
-        [aboutDivider, resumeDivider, projectsDivider].forEach((divider) => divider.classList.remove("active"));
+        [aboutDiv, resumeDiv, projectsDiv].forEach((div) => {
+            div.classList.remove("active");
+            div.querySelector(".divider2").classList.remove("active");
+            div.querySelector(".nav-link").classList.remove("active");
+        });
 
         if (scrollPosition < aboutEnd) {
-            aboutLink.classList.add("active");
-            aboutDivider.classList.add("active");
+            aboutDiv.querySelector(".divider2").classList.add("active");
+            aboutDiv.querySelector(".nav-link").classList.add("active");
         } else if (scrollPosition >= aboutEnd && scrollPosition < resumeEnd) {
-            resumeLink.classList.add("active");
-            resumeDivider.classList.add("active");
+            resumeDiv.querySelector(".divider2").classList.add("active");
+            resumeDiv.querySelector(".nav-link").classList.add("active");
         } else if (scrollPosition >= resumeEnd) {
-            projectsLink.classList.add("active");
-            projectsDivider.classList.add("active");
+            projectsDiv.querySelector(".divider2").classList.add("active");
+            projectsDiv.querySelector(".nav-link").classList.add("active");
         }
     };
 
