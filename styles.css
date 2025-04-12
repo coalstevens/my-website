@@ -222,12 +222,6 @@ img {
     justify-content: flex-start; 
     gap: 10px; 
     flex-wrap: wrap; 
-    color: var(--highlight);
-    text-align: left;
-    border-radius: 20px;
-    margin-left: 0; 
-    margin-right: 0;
-    padding: 10px; 
 }
 
 .company {
@@ -249,12 +243,16 @@ img {
 }
 
 .skill {
-    color: var(--highlight);
+    color: var(--text-normal);
     background-color: var(--secondary-background);
     border-radius: 20px;
     padding-left: 20px;
     padding-right: 20px;
     font-family: 'Space Mono', sans-serif;
+}
+
+.experience-wrapper:hover .skill {
+    color: var(--highlight);
 }
 
 .info {
@@ -285,16 +283,13 @@ img {
 }
 
 .date-wrapper {
-    box-sizing: border-box;
     object-fit: fill;
     flex: none;
     justify-content: flex-start;
     align-items: flex-start;
-    font-family: 'Space Mono', sans-serif;
     display: flex;
     width: var(--wrapper-size); 
     overflow: hidden; 
-    border-radius: 8px; 
 }
 
 .job-detail-wrapper {

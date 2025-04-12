@@ -1,6 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
     const links = document.querySelectorAll(".nav-link");
-    const sections = document.querySelectorAll(".content > div");
     const themeToggleInput = document.getElementById("theme-toggle");
     const rootElement = document.documentElement;
 
@@ -57,30 +56,35 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // Handle active state for links and dividers based on scroll position
     const handleScroll = () => {
-        let scrollPosition = window.scrollY + 100;
+        let scrollPosition = window.scrollY;
 
-        sections.forEach((section) => {
-            const sectionTop = section.offsetTop;
-            const sectionHeight = section.offsetHeight;
-            const sectionId = section.getAttribute("id");
+        const resumeSection = document.getElementById("Resume");
+        const projectsSection = document.getElementById("Projects");
 
-            const link = document.querySelector(`.nav-link[data-section="${sectionId}"]`);
-            const divider = link.previousElementSibling;
+        const aboutLink = document.querySelector('.nav-link[data-section="AboutMe"]');
+        const resumeLink = document.querySelector('.nav-link[data-section="Resume"]');
+        const projectsLink = document.querySelector('.nav-link[data-section="Projects"]');
 
-            if (sectionId === "AboutMe" && scrollPosition < sectionTop + sectionHeight) {
-                link.classList.add("active");
-                divider.classList.add("active");
-            } else if (
-                scrollPosition >= sectionTop &&
-                scrollPosition < sectionTop + sectionHeight
-            ) {
-                link.classList.add("active");
-                divider.classList.add("active");
-            } else {
-                link.classList.remove("active");
-                divider.classList.remove("active");
-            }
-        });
+        const aboutDivider = aboutLink.previousElementSibling;
+        const resumeDivider = resumeLink.previousElementSibling;
+        const projectsDivider = projectsLink.previousElementSibling;
+
+        const aboutEnd = resumeSection.offsetTop;
+        const resumeEnd = projectsSection.offsetTop;
+
+        [aboutLink, resumeLink, projectsLink].forEach((link) => link.classList.remove("active"));
+        [aboutDivider, resumeDivider, projectsDivider].forEach((divider) => divider.classList.remove("active"));
+
+        if (scrollPosition < aboutEnd) {
+            aboutLink.classList.add("active");
+            aboutDivider.classList.add("active");
+        } else if (scrollPosition >= aboutEnd && scrollPosition < resumeEnd) {
+            resumeLink.classList.add("active");
+            resumeDivider.classList.add("active");
+        } else if (scrollPosition >= resumeEnd) {
+            projectsLink.classList.add("active");
+            projectsDivider.classList.add("active");
+        }
     };
 
     window.addEventListener("scroll", handleScroll);
