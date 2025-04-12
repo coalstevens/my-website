@@ -109,6 +109,7 @@ p {
     margin-bottom: 20px;
     font-weight: 300;
     line-height: 160%;
+    color: var(--text-normal);
     font-family: 'Space Mono', sans-serif;
 }
 
@@ -322,7 +323,7 @@ img {
 }
 
 .aboutme {
-    color: #9b9b9b;
+    color: var(--text-normal);
     padding: 0px 10px 40px 10px;
     font-family: Space Mono, sans-serif;
     font-weight: 400;
@@ -480,8 +481,8 @@ img {
     --primary-background: #fdf6e3; 
     --secondary-background: #f5e6ca; 
     --highlight: #d4a857; 
-    --text-header: #3e2f23; 
-    --text-normal: #5b4636; 
+    --text-header: #2c3e50; 
+    --text-normal: #9b9b9b; 
     --divider: #e0c9a6; 
     --hover: #e8d3b8; 
     --ripple: #5b4636; 
@@ -600,4 +601,33 @@ img {
 .view-resume-button:hover {
     background-color: var(--hover);
     color: var(--highlight);
+}
+
+.experience-link {
+    text-decoration: none; /* Remove underline */
+    color: inherit; /* Inherit text color */
+    display: block; /* Make the link behave like a block element */
+    transition: transform 0.2s ease; /* Add a hover effect */
+}
+
+.experience-link:hover {
+    transform: scale(1.02); /* Slightly enlarge on hover */
+}
+
+.experience-wrapper {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 20px;
+    flex-wrap: nowrap;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background-color 0.3s ease;
+    border-left: 2px solid transparent;
+}
+
+.experience-wrapper:hover {
+    background-color: var(--hover);
+    border-left: 2px solid var(--highlight);
 }
