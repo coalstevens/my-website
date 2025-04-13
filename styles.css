@@ -574,3 +574,13 @@ img {
     display: block;
     font-family: 'Space Mono', sans-serif;
 }
+
+@media (hover: none) {
+    .nav-link.tapped {
+      color: var(--accent); /* same as hover style */
+    }
+  
+    .divider2.tapped {
+      background-color: var(--accent);
+    }
+}
