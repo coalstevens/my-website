@@ -74,7 +74,12 @@ document.addEventListener("DOMContentLoaded", () => {
             div.querySelector(".nav-link").classList.remove("active");
         });
 
-        if (scrollPosition < aboutEnd) {
+        const atBottom = window.innerHeight + scrollPosition >= document.body.offsetHeight - 2; // 2px fudge factor
+
+        if (atBottom) {
+            projectsDiv.querySelector(".divider2").classList.add("active");
+            projectsDiv.querySelector(".nav-link").classList.add("active");
+        } else if (scrollPosition < aboutEnd) {
             aboutDiv.querySelector(".divider2").classList.add("active");
             aboutDiv.querySelector(".nav-link").classList.add("active");
         } else if (scrollPosition >= aboutEnd && scrollPosition < resumeEnd) {
