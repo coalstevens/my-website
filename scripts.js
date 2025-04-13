@@ -4,8 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const rootElement = document.documentElement;
 
     // Initialize theme based on localStorage or system preference
-    let isDarkTheme = localStorage.getItem("theme") === "dark" ||
-        (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    let isDarkTheme = localStorage.getItem("theme") === "dark" || 
+                      (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
     const applyTheme = () => {
         if (isDarkTheme) {
@@ -128,24 +128,16 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    const navLinks = document.querySelectorAll(".nav-link");
-    const dividers = document.querySelectorAll(".divider2");
-
-    const isMobile = window.matchMedia("(hover: none)").matches;
-
-    if (isMobile) {
-        navLinks.forEach((link) => {
-            link.addEventListener("click", () => {
-                // Clear all others
-                navLinks.forEach(l => l.classList.remove("tapped"));
-                dividers.forEach(d => d.classList.remove("tapped"));
-
-                // Set tapped class on this one + its divider
-                link.classList.add("tapped");
-
-                const divider = link.parentElement.querySelector(".divider2");
-                if (divider) divider.classList.add("tapped");
-            });
+    // Wait until stylesheet is applied
+    const sheet = document.querySelector('link[rel="stylesheet"]');
+    if (sheet) {
+        sheet.addEventListener('load', () => {
+            document.body.classList.remove('hidden');
+        });
+    } else {
+        // Fallback if for some reason the stylesheet isn't found
+        window.addEventListener('DOMContentLoaded', () => {
+            document.body.classList.remove('hidden');
         });
     }
 });
