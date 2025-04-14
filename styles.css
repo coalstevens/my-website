@@ -311,9 +311,11 @@ img {
     border-left: 2px solid transparent;
     min-width: 0;
     cursor: pointer;
+    transition: transform 0.2s ease;
 }
 
 .project-wrapper:hover {
+    transform: scale(1.02);
     background-color: var(--hover);
     border-left: 2px solid var(--highlight);
 }
@@ -321,7 +323,7 @@ img {
 .image-wrapper {
     display: flex;
     width: var(--wrapper-size);
-    margin-top: 10px;
+    align-self: center;
     flex-grow: 0;
     flex-shrink: 0;
 }
@@ -359,7 +361,7 @@ img {
     font-size: 12px;
     font-weight: 600;
     text-decoration: none;
-    transition: color 0.3s ease, margin-left 0.3s ease;
+    transition: color 0.3s ease, margin-left 0.3s;
     display: block;
 }
 
