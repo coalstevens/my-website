@@ -106,7 +106,7 @@ document.addEventListener("DOMContentLoaded", () => {
         ripple.style.borderRadius = "50%";
         ripple.style.width = `${rippleSize}px`;
         ripple.style.height = `${rippleSize}px`;
-        ripple.style.border = `1px solid var(--ripple)`; // Use the ripple color from CSS variables
+        ripple.style.border = `1px solid var(--ripple)`;
         ripple.style.backgroundColor = "transparent";
         ripple.style.opacity = "0.5";
         ripple.style.animation = `ripple ${rippleDuration}s ease-out`;
@@ -141,24 +141,42 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // for video popups
     const lightbox = document.getElementById('lightbox');
     const video = document.getElementById('lightbox-video');
+    const image = document.getElementById('lightbox-image');
     const closeBtn = document.getElementById('lightbox-close');
 
     document.querySelectorAll('.project-wrapper').forEach(img => {
         img.addEventListener('click', () => {
-            video.src = img.dataset.videoSrc;
-            lightbox.style.display = 'flex';
-            video.play();
+            const videoSrc = img.dataset.videoSrc;
+            const imgSrc = img.dataset.imgSrc;
+
+            if (videoSrc) {
+                video.src = videoSrc;
+                video.classList.remove('hidden');
+                image.classList.add('hidden');
+                video.play();
+            } else if (imgSrc) {
+                image.src = imgSrc;
+                image.classList.remove('hidden');
+                video.classList.add('hidden');
+                video.pause();
+                video.currentTime = 0;
+                video.src = '';
+            }
+
+            lightbox.classList.add('show');
         });
     });
 
     closeBtn.addEventListener('click', () => {
+        lightbox.classList.remove('show');
         video.pause();
         video.currentTime = 0;
         video.src = '';
-        lightbox.style.display = 'none';
+        image.src = '';
+        video.classList.add('hidden');
+        image.classList.add('hidden');
     });
 
 });
