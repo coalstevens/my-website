@@ -4,8 +4,8 @@ document.addEventListener("DOMContentLoaded", () => {
     const rootElement = document.documentElement;
 
     // Initialize theme based on localStorage or system preference
-    let isDarkTheme = localStorage.getItem("theme") === "dark" || 
-                      (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
+    let isDarkTheme = localStorage.getItem("theme") === "dark" ||
+        (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
     const applyTheme = () => {
         if (isDarkTheme) {
@@ -140,6 +140,27 @@ document.addEventListener("DOMContentLoaded", () => {
             document.body.classList.remove('hidden');
         });
     }
+
+    // for video popups
+    const lightbox = document.getElementById('lightbox');
+    const video = document.getElementById('lightbox-video');
+    const closeBtn = document.getElementById('lightbox-close');
+
+    document.querySelectorAll('.clickable-image').forEach(img => {
+        img.addEventListener('click', () => {
+            video.src = img.dataset.videoSrc;
+            lightbox.style.display = 'flex';
+            video.play();
+        });
+    });
+
+    closeBtn.addEventListener('click', () => {
+        video.pause();
+        video.currentTime = 0;
+        video.src = '';
+        lightbox.style.display = 'none';
+    });
+
 });
 
 function openLink(url) {

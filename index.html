@@ -221,7 +221,7 @@
             <div id="Projects" class="projects">
                 <div class="project-wrapper">
                     <div class="image-wrapper">
-                        <img src="images/project1.jpg" alt="Project Image" class="project-image">
+                        <img class="clickable-image" src="files/barge_pic.jpg" data-video-src="files/barge_demo.mp4" alt="Preview">
                     </div>
                     <div class="project-detail-wrapper">
                         <h1 class="project-title">Project Title</h1>
@@ -279,6 +279,10 @@
         });
     </script>
     <script src="scripts.js"></script>
+    <div class="lightbox" id="lightbox">
+        <button class="lightbox-close" id="lightbox-close">✕</button>
+        <video id="lightbox-video" controls autoplay muted loop></video>
+    </div>
 </body>
 
 </html>
