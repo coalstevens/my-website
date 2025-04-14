@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const video = document.getElementById('lightbox-video');
     const closeBtn = document.getElementById('lightbox-close');
 
-    document.querySelectorAll('.clickable-image').forEach(img => {
+    document.querySelectorAll('.project-wrapper').forEach(img => {
         img.addEventListener('click', () => {
             video.src = img.dataset.videoSrc;
             lightbox.style.display = 'flex';
