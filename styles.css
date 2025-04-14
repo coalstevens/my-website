@@ -81,38 +81,6 @@
     padding: 20px;
 }
 
-@media (max-width: 820px) {
-    .container {
-        flex-direction: column;
-    }
-
-    .sidebar {
-        position: relative;
-        width: 100%;
-        height: auto;
-        left: 0;
-        justify-items: left;
-    }
-
-    .content {
-        margin-left: 0;
-        max-width: 100%;
-    }
-
-    .experience-wrapper {
-        display: flex;
-        flex-direction: column;
-    }
-
-    .date-wrapper,
-    .job-detail-wrapper {
-        width: 100%;
-    }
-    .navigation-bar {
-        max-width: 400px;
-        margin-left: 10px;
-    }
-}
 
 h1 {
     color: var(--text-normal);
@@ -135,7 +103,6 @@ p {
 }
 
 a {
-    color: #24a7ff;
     text-decoration: underline;
     font-family: 'Space Mono', sans-serif;
 }
@@ -209,13 +176,13 @@ img {
 .skill-wrapper {
     display: flex;
     flex-direction: row;
+    flex-shrink: 1;
     flex-wrap: wrap;
     justify-content: flex-start;
     gap: 10px;
 }
 
 .company {
-    display: block;
     font-size: 16px;
     font-weight: bold;
     color: var(--highlight);
@@ -224,15 +191,17 @@ img {
 }
 
 .summary {
+    display: flex;
+    flex-shrink: 1;
     color: var(--text-normal);
-    margin-right: 8px;
-    padding-bottom: 10px;
     font-family: 'Space Mono', sans-serif;
+    margin-bottom: 10px;
     font-size: 14px;
-    display: inline-block;
 }
 
 .skill {
+    display: flex;
+    flex-shrink: 1;
     color: var(--text-normal);
     background-color: var(--secondary-background);
     border-radius: 20px;
@@ -246,7 +215,8 @@ img {
 }
 
 .info {
-    display: inline-block;
+    display: flex;
+    flex-shrink: 1;
     color: var(--text-header);
     margin-bottom: 5px;
     font-family: 'Space Mono', sans-serif;
@@ -254,6 +224,8 @@ img {
 }
 
 .experience-wrapper {
+    box-sizing: border-box;
+    width: 100%;
     display: flex;
     flex-direction: row;
     flex-wrap: wrap;
@@ -263,7 +235,6 @@ img {
     border-radius: 8px;
     transition: background-color 0.3s ease;
     border-left: 2px solid transparent;
-    min-width: 0;
 }
 
 .experience-wrapper:hover {
@@ -277,7 +248,6 @@ img {
     flex-grow: 0;
     flex-shrink: 0;
     width: var(--wrapper-size);
-    /* background-color: #24a7ff; */
 }
 
 .job-detail-wrapper {
@@ -285,10 +255,12 @@ img {
     flex: 1;
     flex-direction: column;
     min-width: 350px;
+    box-sizing: border-box;
 }
 
 .body {
     background-color: var(--primary-background);
+    margin: 0;
 }
 
 .aboutme {
@@ -332,6 +304,7 @@ img {
 
 .role-wrapper {
     display: flex;
+    flex-shrink: 1;
     gap: 10px;
     font-family: 'Space Mono', sans-serif;
 }
@@ -340,24 +313,26 @@ img {
     display: flex;
     flex-direction: row;
     align-items: flex-start;
-    gap: 20px;
+    flex-wrap: wrap;
+    flex-shrink: 1;
     padding: 10px;
     border-radius: 8px;
     transition: background-color 0.3s ease;
+    border-left: 2px solid transparent;
+    min-width: 0;
 }
 
 .project-wrapper:hover {
     background-color: var(--hover);
+    border-left: 2px solid var(--highlight);
 }
 
 .image-wrapper {
     display: flex;
-    flex-wrap: wrap;
     width: var(--wrapper-size);
     height: var(--wrapper-size);
     flex-grow: 0;
     flex-shrink: 0;
-    border-radius: 8px;
 }
 
 .project-image {
@@ -368,23 +343,17 @@ img {
 
 .project-detail-wrapper {
     display: flex;
+    flex: 1;
     flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
+    min-width: 350px
 }
 
 .project-title {
     font-size: 16px;
     font-weight: bold;
     color: var(--highlight);
-    margin-bottom: 5px;
+    margin-bottom: -5px;
     font-family: 'Space Mono', sans-serif;
-}
-
-.summary {
-    color: var(--text-normal);
-    font-family: 'Space Mono', sans-serif;
-    font-size: 14px;
 }
 
 .nav-link {
@@ -412,7 +381,7 @@ img {
         transform: scale(0);
         opacity: 0.5;
     }
-
+    
     100% {
         transform: scale(4);
         opacity: 0;
@@ -559,7 +528,8 @@ img {
 .experience-link {
     text-decoration: none;
     color: inherit;
-    display: block;
+    display: flex;
+    flex-shrink: 1;
     transition: transform 0.2s ease;
 }
 
@@ -568,9 +538,42 @@ img {
 }
 
 .date-text {
+    display: flex;
+    flex-shrink: 1;
     color: var(--text-normal);
     font-size: 16px;
     font-weight: 600;
-    display: block;
     font-family: 'Space Mono', sans-serif;
+}
+
+@media (max-width: 820px) {
+    html, body {
+        overflow-x: hidden;
+    }
+
+    .container {
+        width: 100%;
+        flex-direction: column;
+        gap: 40px;
+    }
+
+    .sidebar {
+        position: static;
+        margin-top: var(--top-page-margin);
+        width: 100%;
+    }
+
+    .content {
+        margin: 0 10px;
+        padding: 0;
+    }
+
+    .job-detail-wrapper {
+        min-width: 0;
+    }
+
+    .project-wrapper,
+    .experience-wrapper {
+        flex-direction: column;
+    }
 }
