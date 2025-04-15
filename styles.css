@@ -327,6 +327,7 @@ img {
     border-radius: 8px;
     transition: background-color 0.3s ease;
     border-left: 2px solid transparent;
+    margin-bottom: 20px;
     min-width: 0;
     cursor: pointer;
     transition: transform 0.2s ease;
