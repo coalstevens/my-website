@@ -21,6 +21,8 @@ document.addEventListener("DOMContentLoaded", () => {
         applyTheme();
     });
 
+    applyTheme();
+
 
     // Smooth scrolling for navigation links
     links.forEach((link) => {
