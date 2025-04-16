@@ -170,7 +170,6 @@ img {
 }
 
 .summary {
-    display: flex;
     flex-shrink: 1;
     color: var(--text-normal);
     font-family: 'Space Mono', sans-serif;
@@ -202,14 +201,13 @@ img {
     color: var(--highlight);
 }
 
-
-.footer-link {
+.inline-link {
     text-decoration: underline;
     color: var(--text-normal);
     font-family: 'Space Mono', sans-serif;
 }
 
-.footer-link:hover {
+.inline-link:hover {
     color: var(--highlight);
 }
 
@@ -230,9 +228,11 @@ img {
     flex-shrink: 1;
     padding: 10px;
     border-radius: 8px;
-    transition: background-color 0.3s ease;
+    transition: background-color 0.2s ease;
+    transition: transform 0.2s ease;
     border-left: 2px solid transparent;
     margin-bottom: 20px;
+    cursor: pointer;
 }
 
 .experience-wrapper:hover .skill {
@@ -242,6 +242,7 @@ img {
 .experience-wrapper:hover {
     background-color: var(--hover);
     border-left: 2px solid var(--highlight);
+    transform: scale(1.02);
 }
 
 .date-wrapper {
@@ -534,18 +535,6 @@ img {
 .view-resume-button:hover {
     background-color: var(--hover);
     color: var(--highlight);
-}
-
-.experience-link {
-    text-decoration: none;
-    color: inherit;
-    display: flex;
-    flex-shrink: 1;
-    transition: transform 0.2s ease;
-}
-
-.experience-link:hover {
-    transform: scale(1.02);
 }
 
 .date-text {
