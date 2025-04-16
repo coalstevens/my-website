@@ -135,7 +135,6 @@ document.addEventListener("DOMContentLoaded", () => {
             document.body.classList.remove('hidden');
         });
     } else {
-        // Fallback if for some reason the stylesheet isn't found
         window.addEventListener('DOMContentLoaded', () => {
             document.body.classList.remove('hidden');
         });
@@ -173,7 +172,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+    document.addEventListener('keydown', (event) => {
+        if (event.key === 'Escape' || event.key === 'Esc') {
+            closeLightBox();
+        }
+    });
+
     closeBtn.addEventListener('click', () => {
+        closeLightBox();
+    });
+
+    function closeLightBox() {
         lightbox.classList.remove('show');
         video.pause();
         video.currentTime = 0;
@@ -181,10 +190,10 @@ document.addEventListener("DOMContentLoaded", () => {
         image.src = '';
         video.classList.add('hidden');
         image.classList.add('hidden');
-    });
+    }
 
-    document.querySelector('.inline-link').addEventListener('click', function (e) {
-        e.stopPropagation(); // Prevents the enclosing div's click from firing
+    document.querySelector('.inline-link').addEventListener('click', function (event) {
+        event.stopPropagation(); // Prevents the enclosing div's click from firing
     });
 
 });
