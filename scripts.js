@@ -182,6 +182,12 @@ document.addEventListener("DOMContentLoaded", () => {
         closeLightBox();
     });
 
+    lightbox.addEventListener('click', (e) => {
+        if (e.target === lightbox) {
+            closeLightBox();
+        }
+    });
+
     function closeLightBox() {
         lightbox.classList.remove('show');
         video.pause();
@@ -192,10 +198,11 @@ document.addEventListener("DOMContentLoaded", () => {
         image.classList.add('hidden');
     }
 
-    document.querySelector('.inline-link').addEventListener('click', function (event) {
-        event.stopPropagation(); // Prevents the enclosing div's click from firing
+    document.querySelectorAll('.inline-link').forEach(link => {
+        link.addEventListener('click', function (event) {
+            event.stopPropagation();
+        });
     });
-
 });
 
 function openLink(url) {
