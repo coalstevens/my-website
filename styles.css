@@ -72,6 +72,7 @@
     margin-left: calc(var(--sidebar-width) + var(--gap-between) + var(--page-margin));
     margin-right: var(--page-margin);
     padding: 20px;
+    gap: 80px;
 }
 
 
@@ -267,7 +268,7 @@ img {
 
 .aboutme {
     color: var(--text-normal);
-    padding: 0px 10px 40px 10px;
+    padding: 0px 10px 0px 10px;
     font-family: 'Space Mono', sans-serif;
     font-weight: normal;
 }
@@ -518,22 +519,19 @@ img {
 
 .view-resume-wrapper {
     text-align: left;
-    margin-bottom: 80px;
+    margin-top: 30px;
 }
 
 .view-resume-button {
     display: inline-block;
-    padding: 10px 15px;
     font-size: 16px;
     font-weight: normal;
-    color: var(--text-header);
-    background-color: var(--secondary-background);
-    text-decoration: none;
+    color: var(--text-normal);
+    text-decoration: underline;
     transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 .view-resume-button:hover {
-    background-color: var(--hover);
     color: var(--highlight);
 }
 
