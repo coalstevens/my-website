@@ -86,10 +86,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    let scrollTimeout;
     window.addEventListener("scroll", () => {
-        clearTimeout(scrollTimeout);
-        scrollTimeout = setTimeout(handleScroll, 100);
+        handleScroll();
     });
 
     handleScroll();
