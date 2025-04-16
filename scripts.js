@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const image = document.getElementById('lightbox-image');
     const closeBtn = document.getElementById('lightbox-close');
 
-    document.querySelectorAll('.project-wrapper').forEach(item => {
+    document.querySelectorAll('.project-wrapper, .experience-wrapper').forEach(item => {
         item.addEventListener('click', () => {
             const videoSrc = item.dataset.videoSrc;
             const imgSrc = item.dataset.imgSrc;
@@ -181,6 +181,10 @@ document.addEventListener("DOMContentLoaded", () => {
         image.src = '';
         video.classList.add('hidden');
         image.classList.add('hidden');
+    });
+
+    document.querySelector('.inline-link').addEventListener('click', function (e) {
+        e.stopPropagation(); // Prevents the enclosing div's click from firing
     });
 
 });
