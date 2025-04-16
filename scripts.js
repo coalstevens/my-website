@@ -5,7 +5,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const rootElement = document.documentElement;
 
 
-    // Initialize theme based on localStorage or system preference
+    // Theme
     let isDarkTheme = localStorage.getItem("theme") === "dark" ||
         (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
@@ -16,10 +16,6 @@ document.addEventListener("DOMContentLoaded", () => {
         themeToggleInput.checked = !isDarkTheme;
     };
 
-    applyTheme();
-
-
-    // Toggle theme on slider change
     themeToggleInput.addEventListener("change", () => {
         isDarkTheme = !themeToggleInput.checked;
         applyTheme();
@@ -159,7 +155,7 @@ document.addEventListener("DOMContentLoaded", () => {
             const linkSrc = item.dataset.linkSrc;
 
             if (linkSrc) {
-                window.open(linkSrc, '_blank');
+                window.open(linkSrc, '_blank', 'noopener,noreferrer');
                 return;
             }
 
@@ -218,5 +214,5 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function openLink(url) {
-    window.open(url, '_blank');
+    window.open(url, '_blank', 'noopener,noreferrer');
 }

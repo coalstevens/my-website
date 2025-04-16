@@ -5,10 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
     <title>Cole Stevens</title>
     <link rel="preload" href="styles.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
+    <link rel="preload" href="fonts/SpaceMono-Regular.ttf" as="font" type="font/ttf" crossorigin="anonymous">
+    <link rel="preload" href="fonts/SpaceMono-Bold.ttf" as="font" type="font/ttf" crossorigin="anonymous">
     <link rel="icon" type="image/png" href="/icons/favicon.png">
     <noscript>
         <link rel="stylesheet" href="styles.css">
     </noscript>
+    <script>
+        const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        const storedTheme = localStorage.getItem("theme");
+        const isDark = storedTheme === "dark" || (!storedTheme && prefersDark);
+        document.documentElement.classList.toggle("dark", isDark);
+        document.documentElement.classList.toggle("light", !isDark);
+      </script>
     <style>
         .hidden {
             visibility: hidden;
@@ -32,17 +41,17 @@
                 </div>
                 <div class="table-of-contents-link" data-section="Projects">
                     <div class="nav-line"></div>
-                    <a href="#Projects" class="nav-link" >projects</a>
+                    <a href="#Projects" class="nav-link">projects</a>
                 </div>
                 <div class="social-theme-wrapper">
                     <div class="social-link-group">
-                        <a href="https://github.com/coalstevens" target="_blank" class="social-icon-link"><img
+                        <a href="https://github.com/coalstevens" target="_blank" class="social-icon-link" rel="noopener noreferrer"><img
                                 src="icons/github.svg" alt="GitHub"></a>
                         <a href="https://www.linkedin.com/in/cole-stevens-19288518b/" target="_blank"
-                            class="social-icon-link"><img src="icons/linkedin.svg" alt="LinkedIn"></a>
-                        <a href="https://www.instagram.com/coyaclimbs/" target="_blank" class="social-icon-link"><img
+                            class="social-icon-link" rel="noopener noreferrer"><img src="icons/linkedin.svg" alt="LinkedIn"></a>
+                        <a href="https://www.instagram.com/coyaclimbs/" target="_blank" class="social-icon-link" rel="noopener noreferrer"><img
                                 src="icons/instagram.svg" alt="Instagram"></a>
-                        <a href="https://coalstevens.itch.io/" target="_blank" class="social-icon-link"><img
+                        <a href="https://coalstevens.itch.io/" target="_blank" class="social-icon-link" rel="noopener noreferrer"><img
                                 src="icons/itch.svg" alt="Itch.io"></a>
                     </div>
                     <div class="theme-toggle">
@@ -123,7 +132,7 @@
                             mechanical design and embedded systems. I led development of automated manufacturing and
                             testing equipment, and co-invented a <a
                                 href="https://patents.google.com/patent/WO2024103186A1" target="_blank"
-                                class="inline-link">patented fluid control device</a>. The role bridged
+                                class="inline-link" rel="noopener noreferrer" >patented fluid control device</a>. The role bridged
                             disciplines and carried projects from concept to production.
                         </p>
                         <div class="skill-wrapper">
@@ -151,7 +160,7 @@
                             Supported prototyping and testing across the R&D team, focusing on mechanical design and
                             hands-on builds for <a
                                 href="https://www.ctvnews.ca/vancouver/article/this-technology-could-lead-to-new-treatments-and-cures-for-severe-childhood-illnesses/"
-                                target="_blank" class="inline-link">laboratory automation</a>. I created wiring harness
+                                target="_blank" class="inline-link" rel="noopener noreferrer">laboratory automation</a>. I created wiring harness
                             drawings, assembled systems, and helped
                             troubleshoot early prototypes.
                         </p>
@@ -212,7 +221,7 @@
             <div id="Projects" class="projects">
                 <div class="project-wrapper" data-link-src="https://coalstevens.itch.io/">
                     <div class="image-wrapper">
-                        <img src="files/fishblitz_cap.png" alt="Preview" class="project-image">
+                        <img src="files/fishblitz_cap.png" loading="lazy" alt="Preview" class="project-image">
                     </div>
                     <div class="project-detail-wrapper">
                         <h1 class="project-title">fishBLITZ Unity Game ↗ - Ongoing</h1>
@@ -231,7 +240,7 @@
                 </div>
                 <div class="project-wrapper" data-link-src="https://github.com/coalstevens/CHIP8Emulator">
                     <div class="image-wrapper">
-                        <img src="files/chip8_logo.svg" alt="Preview" class="project-image">
+                        <img src="files/chip8_logo.svg" loading="lazy" alt="Preview" class="project-image">
                     </div>
                     <div class="project-detail-wrapper">
                         <h1 class="project-title">CHIP-8 Emulator ↗ - 2024</h1>
@@ -249,7 +258,7 @@
                 </div>
                 <div class="project-wrapper" data-link-src="https://www.zaber.com/">
                     <div class="image-wrapper">
-                        <img src="files/zaber_logo.png" alt="Preview" class="project-image">
+                        <img src="files/zaber_logo.png" loading="lazy" alt="Preview" class="project-image">
                     </div>
                     <div class="project-detail-wrapper">
                         <h1 class="project-title">Capstone for Zaber Technologies ↗ - 2021</h1>
@@ -267,7 +276,7 @@
                 </div>
                 <div class="project-wrapper" data-video-src="files/barge_demo.mp4">
                     <div class="image-wrapper">
-                        <img src="files/barge_pic.jpg" alt="Preview" class="project-image">
+                        <img src="files/barge_pic.jpg" loading="lazy" alt="Preview" class="project-image">
                     </div>
                     <div class="project-detail-wrapper">
                         <h1 class="project-title">Rocket Barge - 2019</h1>
@@ -286,7 +295,7 @@
                 </div>
                 <div class="project-wrapper" data-video-src="files/train_demo.mp4">
                     <div class="image-wrapper">
-                        <img src="files/train_pic.jpg" alt="Preview" class="project-image">
+                        <img src="files/train_pic.jpg" loading="lazy" alt="Preview" class="project-image">
                     </div>
                     <div class="project-detail-wrapper">
                         <h1 class="project-title">Rail Rider - 2019</h1>
@@ -303,7 +312,7 @@
                 </div>
                 <div class="project-wrapper" data-img-src="files/tree_pic.jpg">
                     <div class="image-wrapper">
-                        <img src="files/tree_pic.jpg" alt="Preview" class="project-image">
+                        <img src="files/tree_pic.jpg" loading="lazy" alt="Preview" class="project-image">
                     </div>
                     <div class="project-detail-wrapper">
                         <h1 class="project-title">Jewellery Tree - 2019</h1>
@@ -319,7 +328,7 @@
                 </div>
                 <div class="project-wrapper" data-img-src="files/philips_projects.png">
                     <div class="image-wrapper">
-                        <img src="files/philips_pic.png" alt="Preview" class="project-image">
+                        <img src="files/philips_pic.png" loading="lazy" alt="Preview" class="project-image">
                     </div>
                     <div class="project-detail-wrapper">
                         <h1 class="project-title">Signify Projects - 2018</h1>
@@ -337,7 +346,7 @@
                 </div>
                 <div class="project-wrapper" data-video-src="files/claw_demo.mp4">
                     <div class="image-wrapper">
-                        <img src="files/claw_pic.JPG" alt="Preview" class="project-image">
+                        <img src="files/claw_pic.JPG" loading="lazy" alt="Preview" class="project-image">
                     </div>
                     <div class="project-detail-wrapper">
                         <h1 class="project-title">Claw - 2017</h1>
@@ -358,7 +367,7 @@
             </div>
             <div class="footer">
                 <p><a href="https://github.com/coalstevens/my-website" target="_blank"
-                        class="inline-link">Hand-coded</a> with HTML, CSS, and JavaScript in Visual Studio Code. No
+                        class="inline-link" rel="noopener noreferrer">Hand-coded</a> with HTML, CSS, and JavaScript in Visual Studio Code. No
                     frameworks or libraries, just clean, responsive code from scratch.</p>
             </div>
         </div>
@@ -368,7 +377,7 @@
             document.body.classList.remove("hidden");
         });
     </script>
-    <script src="scripts.js"></script>
+    <script src="scripts.js" type="module"></script>
     <div class="lightbox" id="lightbox">
         <button class="lightbox-close" id="lightbox-close">✕</button>
         <video id="lightbox-video" class="hidden" muted autoplay loop controls></video>
