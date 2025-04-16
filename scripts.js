@@ -1,28 +1,23 @@
 document.addEventListener("DOMContentLoaded", () => {
+    const body = document.body;
     const links = document.querySelectorAll(".nav-link");
     const themeToggleInput = document.getElementById("theme-toggle");
     const rootElement = document.documentElement;
+
 
     // Initialize theme based on localStorage or system preference
     let isDarkTheme = localStorage.getItem("theme") === "dark" ||
         (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
 
     const applyTheme = () => {
-        if (isDarkTheme) {
-            rootElement.classList.remove("light");
-            rootElement.classList.add("dark");
-            localStorage.setItem("theme", "dark");
-            themeToggleInput.checked = false;
-        } else {
-            rootElement.classList.remove("dark");
-            rootElement.classList.add("light");
-            localStorage.setItem("theme", "light");
-            themeToggleInput.checked = true;
-        }
+        rootElement.classList.toggle("light", !isDarkTheme);
+        rootElement.classList.toggle("dark", isDarkTheme);
+        localStorage.setItem("theme", isDarkTheme ? "dark" : "light");
+        themeToggleInput.checked = !isDarkTheme;
     };
 
-    // Apply the initial theme
     applyTheme();
+
 
     // Toggle theme on slider change
     themeToggleInput.addEventListener("change", () => {
@@ -30,11 +25,12 @@ document.addEventListener("DOMContentLoaded", () => {
         applyTheme();
     });
 
+
     // Smooth scrolling for navigation links
     links.forEach((link) => {
         link.addEventListener("click", (e) => {
             e.preventDefault();
-            const sectionId = link.getAttribute("data-section");
+            const sectionId = link.parentElement.getAttribute("data-section");
 
             if (sectionId === "AboutMe") {
                 window.scrollTo({
@@ -54,19 +50,20 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
+
     // Handle active state for links and dividers based on scroll position
+    const resumeSection = document.getElementById("Resume");
+    const projectsSection = document.getElementById("Projects");
+
+    const aboutDiv = document.querySelector('.table-of-contents-link[data-section="AboutMe"]');
+    const resumeDiv = document.querySelector('.table-of-contents-link[data-section="Resume"]');
+    const projectsDiv = document.querySelector('.table-of-contents-link[data-section="Projects"]');
+
+    const aboutEnd = resumeSection.offsetTop;
+    const resumeEnd = projectsSection.offsetTop;
+
     const handleScroll = () => {
-        let scrollPosition = window.scrollY;
-
-        const resumeSection = document.getElementById("Resume");
-        const projectsSection = document.getElementById("Projects");
-
-        const aboutDiv = document.querySelector('.table-of-contents-link .nav-link[data-section="AboutMe"]').parentElement;
-        const resumeDiv = document.querySelector('.table-of-contents-link .nav-link[data-section="Resume"]').parentElement;
-        const projectsDiv = document.querySelector('.table-of-contents-link .nav-link[data-section="Projects"]').parentElement;
-
-        const aboutEnd = resumeSection.offsetTop;
-        const resumeEnd = projectsSection.offsetTop;
+        const scrollPosition = window.scrollY;
 
         [aboutDiv, resumeDiv, projectsDiv].forEach((div) => {
             div.classList.remove("active");
@@ -74,7 +71,7 @@ document.addEventListener("DOMContentLoaded", () => {
             div.querySelector(".nav-link").classList.remove("active");
         });
 
-        const atBottom = window.innerHeight + scrollPosition >= document.body.offsetHeight - 2; // 2px fudge factor
+        const atBottom = window.innerHeight + scrollPosition >= body.offsetHeight - 2; // 2px fudge factor
 
         if (atBottom) {
             projectsDiv.querySelector(".nav-line").classList.add("active");
@@ -91,8 +88,14 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    window.addEventListener("scroll", handleScroll);
+    let scrollTimeout;
+    window.addEventListener("scroll", () => {
+        clearTimeout(scrollTimeout);
+        scrollTimeout = setTimeout(handleScroll, 100);
+    });
+
     handleScroll();
+
 
     // Ripple effect
     const rippleSize = 15;
@@ -111,45 +114,54 @@ document.addEventListener("DOMContentLoaded", () => {
         ripple.style.opacity = "0.5";
         ripple.style.animation = `ripple ${rippleDuration}s ease-out`;
         ripple.style.pointerEvents = "none";
-        document.body.appendChild(ripple);
+        body.appendChild(ripple);
 
         setTimeout(() => {
-            document.body.removeChild(ripple);
+            body.removeChild(ripple);
         }, rippleDuration * 1000);
     };
 
-    window.addEventListener("mouseup", (e) => {
-        createRipple(e.clientX, e.clientY);
-    });
+    window.addEventListener("mouseup", (e) => createRipple(e.clientX, e.clientY), { passive: true });
 
     window.addEventListener("touchend", (e) => {
         for (const touch of e.changedTouches) {
             createRipple(touch.clientX, touch.clientY);
         }
-    });
+    }, { passive: true });
 
-    // Wait until stylesheet is applied
+
+
+    // Wait to show page until stylesheet is applied
     const sheet = document.querySelector('link[rel="stylesheet"]');
+
     if (sheet) {
         sheet.addEventListener('load', () => {
-            document.body.classList.remove('hidden');
+            body.classList.remove('hidden');
         });
     } else {
         window.addEventListener('DOMContentLoaded', () => {
-            document.body.classList.remove('hidden');
+            body.classList.remove('hidden');
         });
     }
 
+
+    // Lightbox
     const lightbox = document.getElementById('lightbox');
     const video = document.getElementById('lightbox-video');
     const image = document.getElementById('lightbox-image');
     const closeBtn = document.getElementById('lightbox-close');
+    const projectAndExperienceWrappers = document.querySelectorAll('.project-wrapper, .experience-wrapper');
 
-    document.querySelectorAll('.project-wrapper, .experience-wrapper').forEach(item => {
+    projectAndExperienceWrappers.forEach(item => {
         item.addEventListener('click', () => {
             const videoSrc = item.dataset.videoSrc;
             const imgSrc = item.dataset.imgSrc;
             const linkSrc = item.dataset.linkSrc;
+
+            if (linkSrc) {
+                window.open(linkSrc, '_blank');
+                return;
+            }
 
             if (videoSrc) {
                 video.src = videoSrc;
@@ -163,12 +175,11 @@ document.addEventListener("DOMContentLoaded", () => {
                 video.pause();
                 video.currentTime = 0;
                 video.src = '';
-            } else if (linkSrc) {
-                window.open(linkSrc, 'blank');
-                return;
             }
 
-            lightbox.classList.add('show');
+            if (!lightbox.classList.contains('show')) {
+                lightbox.classList.add('show');
+            }
         });
     });
 
@@ -198,7 +209,8 @@ document.addEventListener("DOMContentLoaded", () => {
         image.classList.add('hidden');
     }
 
-    document.querySelectorAll('.inline-link').forEach(link => {
+    const inlineLinks = document.querySelectorAll('.inline-link');
+    inlineLinks.forEach(link => {
         link.addEventListener('click', function (event) {
             event.stopPropagation();
         });

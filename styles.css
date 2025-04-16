@@ -297,7 +297,6 @@ img {
     width: 30%;
 }
 
-
 .role-wrapper {
     display: flex;
     flex-shrink: 1;
@@ -572,7 +571,6 @@ img {
   border-radius: 8px;
   box-shadow: none;
 }
-
 
 .lightbox-close {
     position: absolute;
