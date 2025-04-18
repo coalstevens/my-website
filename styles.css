@@ -571,6 +571,10 @@ img {
 
 @media (max-width: 820px) {
 
+    .blurb {
+        margin-right:  20px;
+    }
+
     .table-of-contents-link:hover .nav-link {
         color: var(--text-normal);
         margin-left: 10px;
