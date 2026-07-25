@@ -93,6 +93,49 @@ document.addEventListener("DOMContentLoaded", () => {
     handleScroll();
 
 
+    // Highlight experience wrapper when centered in viewport
+    const experienceWrappers = document.querySelectorAll('.experience-wrapper');
+    let ticking = false;
+
+    const updateActiveExperience = () => {
+        const viewportCenter = window.innerHeight / 2;
+
+        let closest = null;
+        let closestDist = Infinity;
+
+        experienceWrappers.forEach((wrapper) => {
+            const rect = wrapper.getBoundingClientRect();
+            const wrapperCenter = rect.top + rect.height / 2;
+            const dist = Math.abs(wrapperCenter - viewportCenter);
+
+            if (dist < closestDist) {
+                closestDist = dist;
+                closest = wrapper;
+            }
+        });
+
+        experienceWrappers.forEach((wrapper) => {
+            if (wrapper === closest) {
+                wrapper.classList.add('active');
+            } else {
+                wrapper.classList.remove('active');
+            }
+        });
+    };
+
+    window.addEventListener('scroll', () => {
+        if (!ticking) {
+            requestAnimationFrame(() => {
+                updateActiveExperience();
+                ticking = false;
+            });
+            ticking = true;
+        }
+    }, { passive: true });
+
+    updateActiveExperience();
+
+
     // Ripple effect
     const rippleSize = 15;
     const rippleDuration = 1;
@@ -146,9 +189,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const video = document.getElementById('lightbox-video');
     const image = document.getElementById('lightbox-image');
     const closeBtn = document.getElementById('lightbox-close');
-    const projectAndExperienceWrappers = document.querySelectorAll('.project-wrapper, .experience-wrapper');
+    const projectWrappers = document.querySelectorAll('.project-wrapper');
 
-    projectAndExperienceWrappers.forEach(item => {
+    projectWrappers.forEach(item => {
         item.addEventListener('click', () => {
             const videoSrc = item.dataset.videoSrc;
             const imgSrc = item.dataset.imgSrc;

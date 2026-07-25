@@ -204,10 +204,9 @@ img {
     transition: transform 0.2s ease;
     border-left: 2px solid transparent;
     margin-bottom: 20px;
-    cursor: pointer;
 }
 
-.experience-wrapper:hover .skill {
+.experience-wrapper.active .skill {
     color: var(--highlight);
 }
 
@@ -215,8 +214,8 @@ img {
     color: var(--highlight);
 }
 
-.experience-wrapper:hover {
-    background-color: var(--hover);
+.experience-wrapper.active {
+    /* background-color: var(--hover); */
     border-left: 2px solid var(--highlight);
     transform: scale(1.02);
 }
@@ -471,19 +470,19 @@ img {
 
 .theme-toggle-icon {
     position: absolute;
-    font-size: 14px;
+    font-size: 12px;
     top: 50%;
-    transform: translateY(-50%);
+    transform: translate(-50%, -50%);
     pointer-events: none;
     filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(0%);
 }
 
 .theme-toggle-icon.sun {
-    left: 5px;
+    left: 25%;
 }
 
 .theme-toggle-icon.moon {
-    right: 5px;
+    left: 75%;
 }
 
 .view-resume-wrapper {
@@ -599,13 +598,13 @@ img {
         filter: invert(0%) sepia(0%) saturate(0%) hue-rotate(0deg) brightness(0%) contrast(0%);
     }
 
-    .experience-wrapper:hover {
+    .experience-wrapper.active {
         background-color: inherit;
         border-left: 2px solid transparent;
         transform: inherit;
     }
 
-    .experience-wrapper:hover .skill {
+    .experience-wrapper.active .skill {
         color: var(--text-normal);
     }
 
