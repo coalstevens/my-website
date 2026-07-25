@@ -254,6 +254,21 @@ document.addEventListener("DOMContentLoaded", () => {
             event.stopPropagation();
         });
     });
+
+    const banner = document.getElementById('bottom-banner');
+    const gif = document.getElementById('cookie-gif');
+    const text = document.getElementById('cookie-text');
+    setTimeout(() => {
+        banner.classList.add('visible');
+        setTimeout(() => {
+            gif.style.display = 'none';
+            text.classList.remove('hidden');
+            setTimeout(() => {
+                banner.classList.add('fade-out');
+                setTimeout(() => banner.remove(), 500);
+            }, 3000);
+        }, 4700);
+    }, 6000);
 });
 
 function openLink(url) {
