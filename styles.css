@@ -58,7 +58,57 @@
     margin-left: calc(var(--sidebar-width) + var(--gap-between) + var(--page-margin));
     margin-right: var(--page-margin);
     padding: 20px;
+    padding-bottom: 25vh;
     gap: 80px;
+}
+
+.bottom-banner {
+    position: fixed;
+    bottom: 0;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 65%;
+    height: 15vh;
+    border-top: 2px solid var(--highlight);
+    background-color: var(--primary-background);
+    z-index: 1000;
+    opacity: 0;
+    transition: opacity 0.5s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.bottom-banner.visible {
+    opacity: 1;
+}
+
+.bottom-banner.fade-out {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.cookie-gif {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    height: 60%;
+    width: auto;
+}
+
+.cookie-text {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: var(--highlight);
+    font-family: 'Space Mono', sans-serif;
+    font-size: 16px;
+    font-weight: bold;
+    line-height: 120%;
+    margin: 0;
+    white-space: nowrap;
 }
 
 
@@ -631,7 +681,7 @@ img {
 
     .content {
         margin: 0 10px;
-        padding: 0;
+        padding: 0 0 25vh 0;
     }
 
     .job-detail-wrapper {
