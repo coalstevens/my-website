@@ -1,7 +1,8 @@
 /* Real links first; a small zoom transition progressively enhances navigation. */
 (() => {
   const key='training-page-zoom';
-  const main=document.querySelector('main');
+  const main=document.querySelector('[data-page-transition]') || document.querySelector('main');
+  if(!main) return;
   const reduced=()=>window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let leaving=false, exitAnimation=null;
   function arrival() {
@@ -19,7 +20,7 @@
   }
   arrival();
   document.addEventListener('click',event=> {
-    const link=event.target.closest('a[data-zoom]');
+    const link=event.target.closest?.('a[data-zoom]');
     if(!link || event.defaultPrevented || event.button!==0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || link.hasAttribute('download') || (link.target && link.target!=='_self')) return;
     const target=new URL(link.href,location.href);
     if(target.origin!==location.origin || target.href===location.href) return;
@@ -34,8 +35,8 @@
       {transform:'scale(1)',opacity:1},
       {transform:`scale(${direction === 'out' ? .945 : 1.055})`,opacity:.15}
     ],{duration:180,easing:'cubic-bezier(.4,0,.8,.4)',fill:'forwards'});
-    exitAnimation.finished.then(()=>location.assign(target.href),()=>{leaving=false;});
-  });
+    exitAnimation.finished.then(()=>location.assign(target.href),()=>{leaving=false;document.body.classList.remove('page-zooming');});
+  }, {capture:true});
   window.addEventListener('pageshow',event=> {
     if(event.persisted) {
       exitAnimation?.cancel();

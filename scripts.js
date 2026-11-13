@@ -1,27 +1,7 @@
 document.addEventListener("DOMContentLoaded", () => {
     const body = document.body;
     const links = document.querySelectorAll(".nav-link");
-    const themeToggleInput = document.getElementById("theme-toggle");
-    const rootElement = document.documentElement;
-
-
-    // Theme
-    let isDarkTheme = localStorage.getItem("theme") === "dark" ||
-        (!localStorage.getItem("theme") && window.matchMedia("(prefers-color-scheme: dark)").matches);
-
-    const applyTheme = () => {
-        rootElement.classList.toggle("light", !isDarkTheme);
-        rootElement.classList.toggle("dark", isDarkTheme);
-        localStorage.setItem("theme", isDarkTheme ? "dark" : "light");
-        themeToggleInput.checked = !isDarkTheme;
-    };
-
-    themeToggleInput.addEventListener("change", () => {
-        isDarkTheme = !themeToggleInput.checked;
-        applyTheme();
-    });
-
-    applyTheme();
+    const reducedMotion = () => window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 
     // Smooth scrolling for navigation links
@@ -32,7 +12,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
             if (sectionId === "AboutMe") {
                 window.scrollTo({
-                    behavior: "smooth",
+                    behavior: reducedMotion() ? "instant" : "smooth",
                     top: 0,
                 });
             } else {
@@ -40,7 +20,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (targetSection) {
                     targetSection.scrollIntoView({
-                        behavior: "smooth",
+                        behavior: reducedMotion() ? "instant" : "smooth",
                         block: "start",
                     });
                 }
@@ -57,11 +37,10 @@ document.addEventListener("DOMContentLoaded", () => {
     const resumeDiv = document.querySelector('.table-of-contents-link[data-section="Resume"]');
     const projectsDiv = document.querySelector('.table-of-contents-link[data-section="Projects"]');
 
-    const aboutEnd = resumeSection.offsetTop;
-    const resumeEnd = projectsSection.offsetTop;
-
     const handleScroll = () => {
         const scrollPosition = window.scrollY;
+        const aboutEnd = resumeSection.offsetTop - 36;
+        const resumeEnd = projectsSection.offsetTop - 36;
 
         [aboutDiv, resumeDiv, projectsDiv].forEach((div) => {
             div.classList.remove("active");
@@ -86,9 +65,8 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     };
 
-    window.addEventListener("scroll", () => {
-        handleScroll();
-    });
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleScroll);
 
     handleScroll();
 
@@ -141,6 +119,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const rippleDuration = 1;
 
     const createRipple = (x, y) => {
+        if (reducedMotion()) return;
         const ripple = document.createElement("div");
         ripple.style.position = "fixed";
         ripple.style.left = `${x - rippleSize / 2}px`;
@@ -170,35 +149,39 @@ document.addEventListener("DOMContentLoaded", () => {
 
 
 
-    // Wait to show page until stylesheet is applied
-    const sheet = document.querySelector('link[rel="stylesheet"]');
-
-    if (sheet) {
-        sheet.addEventListener('load', () => {
-            body.classList.remove('hidden');
-        });
-    } else {
-        window.addEventListener('DOMContentLoaded', () => {
-            body.classList.remove('hidden');
-        });
-    }
-
-
     // Lightbox
     const lightbox = document.getElementById('lightbox');
     const video = document.getElementById('lightbox-video');
     const image = document.getElementById('lightbox-image');
     const closeBtn = document.getElementById('lightbox-close');
     const projectWrappers = document.querySelectorAll('.project-wrapper');
+    let previewTrigger = null;
 
     projectWrappers.forEach(item => {
-        item.addEventListener('click', () => {
+        const hasLink = !!item.dataset.linkSrc;
+        item.tabIndex = 0;
+        item.setAttribute('role', hasLink ? 'link' : 'button');
+        item.setAttribute('aria-label', item.querySelector('.project-title').textContent.trim());
+        if (!hasLink) item.setAttribute('aria-haspopup', 'dialog');
+        item.addEventListener('keydown', event => {
+            if (event.target !== item || (event.key !== 'Enter' && (hasLink || event.key !== ' '))) return;
+            event.preventDefault();
+            item.click();
+        });
+        item.addEventListener('click', event => {
+            // Nested links keep their native behavior and page transitions.
+            if (event.target.closest('a')) return;
             const videoSrc = item.dataset.videoSrc;
             const imgSrc = item.dataset.imgSrc;
             const linkSrc = item.dataset.linkSrc;
 
             if (linkSrc) {
-                window.open(linkSrc, '_blank', 'noopener,noreferrer');
+                const target = new URL(linkSrc, location.href);
+                if (target.origin === location.origin) {
+                    const link = item.querySelector('a[data-zoom]');
+                    if (link) link.click();
+                    else location.assign(target.href);
+                } else window.open(target.href, '_blank', 'noopener,noreferrer');
                 return;
             }
 
@@ -206,7 +189,13 @@ document.addEventListener("DOMContentLoaded", () => {
                 video.src = videoSrc;
                 video.classList.remove('hidden');
                 image.classList.add('hidden');
-                video.play();
+                video.play().catch(error => {
+                    // Closing immediately can interrupt playback; controls remain
+                    // available if the browser disallows automatic playback.
+                    if (!['AbortError', 'NotAllowedError'].includes(error.name)) {
+                        console.error('Project video could not play', error);
+                    }
+                });
             } else if (imgSrc) {
                 image.src = imgSrc;
                 image.classList.remove('hidden');
@@ -216,15 +205,25 @@ document.addEventListener("DOMContentLoaded", () => {
                 video.src = '';
             }
 
-            if (!lightbox.classList.contains('show')) {
-                lightbox.classList.add('show');
-            }
+            previewTrigger = item;
+            lightbox.classList.add('show');
+            body.classList.add('preview-open');
+            closeBtn.focus();
         });
     });
 
     document.addEventListener('keydown', (event) => {
-        if (event.key === 'Escape' || event.key === 'Esc') {
-            closeLightBox();
+        if (!lightbox.classList.contains('show')) return;
+        if (event.key === 'Escape') closeLightBox();
+        if (event.key === 'Tab') {
+            const last = video.classList.contains('hidden') ? closeBtn : video;
+            if (event.shiftKey && document.activeElement === closeBtn) {
+                event.preventDefault();
+                last.focus();
+            } else if (!event.shiftKey && document.activeElement === last) {
+                event.preventDefault();
+                closeBtn.focus();
+            }
         }
     });
 
@@ -240,6 +239,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function closeLightBox() {
         lightbox.classList.remove('show');
+        body.classList.remove('preview-open');
+        previewTrigger?.focus({ preventScroll: true });
         video.pause();
         video.currentTime = 0;
         video.src = '';
@@ -248,29 +249,34 @@ document.addEventListener("DOMContentLoaded", () => {
         image.classList.add('hidden');
     }
 
-    const inlineLinks = document.querySelectorAll('.inline-link');
-    inlineLinks.forEach(link => {
-        link.addEventListener('click', function (event) {
-            event.stopPropagation();
-        });
-    });
-
     const banner = document.getElementById('bottom-banner');
     const gif = document.getElementById('cookie-gif');
     const text = document.getElementById('cookie-text');
-    setTimeout(() => {
+    const wait = milliseconds => new Promise(resolve => setTimeout(resolve, milliseconds));
+    async function showCookieBanner() {
+        await wait(6000);
         banner.classList.add('visible');
-        setTimeout(() => {
-            gif.style.display = 'none';
-            text.classList.remove('hidden');
-            setTimeout(() => {
-                banner.classList.add('fade-out');
-                setTimeout(() => banner.remove(), 500);
-            }, 3000);
-        }, 4700);
-    }, 6000);
+        if (!reducedMotion()) {
+            await wait(550);
+            // This non-looping GIF has 47 frames at 100ms each. Assign its
+            // source only now so it cannot finish while the banner is hidden.
+            const loaded = await new Promise(resolve => {
+                gif.onload = () => resolve(true);
+                gif.onerror = () => resolve(false);
+                gif.src = gif.dataset.src;
+            });
+            gif.onload = gif.onerror = null;
+            if (loaded) {
+                gif.classList.remove('hidden');
+                await wait(4700);
+            }
+        }
+        text.classList.remove('hidden');
+        banner.classList.add('show-message');
+        await wait(3400);
+        banner.classList.add('fade-out');
+        await wait(reducedMotion() ? 0 : 400);
+        banner.remove();
+    }
+    showCookieBanner();
 });
-
-function openLink(url) {
-    window.open(url, '_blank', 'noopener,noreferrer');
-}

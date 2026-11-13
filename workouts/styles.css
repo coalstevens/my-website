@@ -16,6 +16,9 @@ h3 { font-size: 20px; letter-spacing: -.5px; }
 label, .notes-label { color: #64665a; font: 12px var(--mono); }
 .intro { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 17px 0 19px; margin-bottom: 15px; border-top: 3px solid #434d45; border-bottom: 1px solid #929988; }
 .intro .muted { margin: 0; font-size: 13px; }
+.portfolio-link { display: inline-block; margin-bottom: 10px; color: #644b78; font-size: 13px; text-decoration: none; text-underline-offset: 3px; }
+.portfolio-link:hover { text-decoration: underline; }
+.portfolio-link:focus-visible { outline: 2px solid #644b78; outline-offset: 4px; }
 button {
   cursor: pointer;
   flex-shrink: 0;

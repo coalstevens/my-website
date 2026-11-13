@@ -4,17 +4,29 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>workout history · analysis</title>
+<script src="theme.js"></script>
 <link rel="stylesheet" href="styles.css">
 <link rel="stylesheet" href="analysis.css">
+<link rel="stylesheet" href="theme.css">
 <script src="archive-cleanup.js" defer></script>
 <script src="history-analysis.js" defer></script>
-<script src="page-navigation.js" defer></script>
+<script src="page-navigation.js?v=2" defer></script>
 <script src="set-trend-chart.js" defer></script>
 <script src="analysis.js" defer></script>
 </head>
 <body class="analysis-page">
 <main>
-<section class="intro"><div><h1>the long view.</h1><p class="muted">training frequency, recorded results, and the work that adds up.</p></div><a class="zoom-link" href="./" data-zoom="in">↙ zoom in <span>current session</span></a></section>
+<nav class="page-navigation" aria-label="Page navigation">
+<a class="portfolio-link" href="./" data-zoom="in">← current session</a>
+<div class="theme-toggle">
+<input type="checkbox" id="theme-toggle" class="theme-toggle-input" aria-label="Use paper theme">
+<label for="theme-toggle" class="theme-toggle-label">
+<span class="theme-toggle-icon sun" aria-hidden="true">☾</span>
+<span class="theme-toggle-icon moon" aria-hidden="true">☼</span>
+</label>
+</div>
+</nav>
+<section class="intro"><div><h1>the long view.</h1><p class="muted">training frequency, recorded results, and the work that adds up.</p></div></section>
 <p id="analysis-status" role="status">loading workout history…</p>
 <form id="analysis-filters" class="analysis-filters">
 <label>from<input type="date" id="from-date" required></label>
