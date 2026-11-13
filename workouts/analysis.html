@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>workout history · analysis</title>
+<link rel="stylesheet" href="styles.css">
+<link rel="stylesheet" href="analysis.css">
+<script src="archive-cleanup.js" defer></script>
+<script src="history-analysis.js" defer></script>
+<script src="page-navigation.js" defer></script>
+<script src="set-trend-chart.js" defer></script>
+<script src="analysis.js" defer></script>
+</head>
+<body class="analysis-page">
+<main>
+<section class="intro"><div><h1>the long view.</h1><p class="muted">training frequency, recorded results, and the work that adds up.</p></div><a class="zoom-link" href="./" data-zoom="in">↙ zoom in <span>current session</span></a></section>
+<p id="analysis-status" role="status">loading workout history…</p>
+<form id="analysis-filters" class="analysis-filters">
+<label>from<input type="date" id="from-date" required></label>
+<label>through<input type="date" id="to-date" required></label>
+<button type="button" id="all-dates">all history</button>
+</form>
+<div id="analysis-content" hidden>
+<section class="analysis-stats" aria-label="History overview" id="analysis-stats"></section>
+<section class="analysis-section" aria-labelledby="frequency-title"><div class="analysis-section-heading frequency-heading"><div><h2 id="frequency-title">showing up</h2></div><label class="calendar-year-select" for="activity-year">year<select id="activity-year"></select></label></div><div id="frequency-chart" class="analysis-chart"></div></section>
+<section class="analysis-section" aria-labelledby="trend-title">
+<div class="analysis-section-heading"><div><h2 id="trend-title">exercise trend</h2></div>
+<div class="trend-controls"><label>exercise<select id="trend-exercise"></select></label><label>measure<select id="trend-metric"><option value="auto">automatic · reps + weight</option><option value="load">weight · lb</option><option value="reps">reps · ordinary sets</option><option value="duration">hold · seconds</option><option value="repeaters">repeaters · work seconds per set</option></select></label></div></div>
+<div id="trend-chart" class="analysis-chart"></div><p id="trend-summary" class="analysis-caption"></p>
+</section>
+<section class="analysis-section" aria-labelledby="breakdown-title"><div class="analysis-section-heading breakdown-heading"><h2 id="breakdown-title">exercise breakdown</h2><label class="breakdown-sort-control" for="breakdown-sort">sort by<select id="breakdown-sort"><option value="sessions">session count</option><option value="recent">most recent</option></select></label></div><p class="analysis-caption">select an exercise to see its trend above</p>
+<div class="analysis-table-wrap" tabindex="0" role="region" aria-label="Exercise statistics"><table class="analysis-table"><thead><tr><th scope="col">exercise</th><th scope="col">sessions</th><th scope="col">sets</th><th scope="col">max load · lb</th><th scope="col">max reps</th><th scope="col">longest hold · s</th><th scope="col">repeaters · max work s</th></tr></thead><tbody id="exercise-breakdown"></tbody></table></div>
+<nav class="breakdown-pagination" aria-label="Exercise breakdown pages"><button type="button" id="breakdown-previous">← previous</button><span id="breakdown-position" role="status" aria-live="polite"></span><button type="button" id="breakdown-next">next →</button></nav>
+</section>
+</div>
+</main>
+</body>
+</html>

@@ -1,0 +1,53 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Training — Cole Stevens</title>
+<link rel="stylesheet" href="styles.css">
+<script src="plate-planner.js" defer></script>
+<script src="archive-cleanup.js" defer></script>
+<script src="session-archive.js" defer></script>
+<script src="exercise-fields.js" defer></script>
+<script src="history-analysis.js" defer></script>
+<script src="page-navigation.js" defer></script>
+<script src="archive-motion.js" defer></script>
+<script src="app.js" defer></script>
+</head>
+<body>
+<main>
+<section class="intro"><div><h1 id="page-title">Back to work.</h1><p id="page-subtitle" class="muted">Same foundation. A little further.</p></div></section>
+<div class="session-heading"><div><div class="date-control"><span id="date-display" aria-hidden="true"></span><input id="date" type="date" aria-label="Workout date"></div></div><span id="save-status" role="status" hidden></span></div>
+<div class="layout"><section class="session">
+<div id="exercises"></div>
+<label class="notes-label" for="notes">SESSION NOTES</label><textarea id="notes" placeholder="How did it feel? Anything to remember?"></textarea>
+<div class="archive-actions">
+<button type="button" id="push-archive" aria-expanded="false" aria-controls="archive-confirm">push to archive</button>
+<div id="archive-confirm" class="archive-confirm" hidden role="group" aria-label="Confirm archive"><span>archive this session and start a fresh workout?</span><button type="button" id="archive-yes">yes</button><button type="button" id="archive-no">no</button></div>
+<button type="button" id="pop-archive" aria-expanded="false" aria-controls="pop-confirm">pop from archive</button>
+<div id="pop-confirm" class="archive-confirm" hidden role="group" aria-label="Confirm restore from archive"><span id="pop-warning">are you sure? this will overwrite the existing workout and notes.</span><button type="button" id="pop-yes">yes</button><button type="button" id="pop-no">no</button></div>
+<span id="archive-action-status" role="status"></span>
+</div>
+</section>
+<aside>
+<section class="panel last-session" aria-labelledby="last-session-title"><h2 id="last-session-title">last session</h2><div class="last-session-entry"><span id="last-session-date"></span><span id="last-session-notes" aria-live="polite"></span></div></section>
+<section class="panel current-analysis" aria-labelledby="current-analysis-title">
+<h2 id="current-analysis-title">the long view</h2>
+<div id="current-exercise-stats"><p>loading history…</p></div>
+<a class="zoom-link" href="analysis.html" data-zoom="out">zoom out ↗ <span>full history analysis</span></a>
+</section>
+<section class="panel"><h2>Plate helper</h2>
+<div class="two-col"><label>Target total<input id="target" type="number" min="0" step="0.5" value="175"></label><label>Bar weight<input id="bar" type="number" min="0" step="0.5" value="45"></label></div>
+<details><summary>Available equipment</summary><div id="equipment"></div></details>
+<div id="plate-result" aria-live="polite"></div>
+</section>
+</aside></div>
+<section id="history" class="history" aria-labelledby="history-title">
+<div class="history-heading"><h2 id="history-title">workout archive</h2><span id="history-status" role="status">loading history…</span></div>
+<div class="archive-carousel-nav" aria-label="Archive navigation"><button type="button" id="archive-newer" aria-label="Show newer session">← newer</button><form id="archive-jump" class="archive-page-control"><input id="archive-page" type="text" inputmode="numeric" pattern="[0-9]*" aria-label="Archive page number" title="Enter a page number and press Enter to jump" autocomplete="off"><span id="archive-total"></span><span id="archive-position" class="sr-only" role="status" aria-live="polite"></span></form><button type="button" id="archive-older" aria-label="Show older session">older →</button></div>
+<div class="archive-stage"><div id="archive-peeks" class="archive-peeks" aria-label="Nearby archived sessions"></div><div id="history-workouts" class="archive-carousel" role="region" aria-roledescription="carousel" aria-label="Archived sessions" tabindex="0"></div></div>
+</section>
+<footer>Prototype data stays in this browser. It does not sync between devices.</footer>
+</main>
+</body>
+</html>

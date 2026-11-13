@@ -1,0 +1,43 @@
+const assert = require('node:assert/strict');
+const {prepare,restore} = require('./session-archive.js');
+const current={date:'2026-11-12',notes:'felt strong',archivedSessions:[],exercises:[
+  {name:'squat',barbell:true,unilateral:false,superset:'a',fields:['Weight · lb','Reps'],values:[[95,8],[135,6]],previous:[[85,8],[125,6]]},
+  {name:'lock off',unilateral:true,fields:['Left · seconds','Right · seconds'],values:[[5,7]],previous:[[4,6]]}
+]};
+const snapshot=JSON.stringify(current);
+const {entry,next}=prepare(current,'2026-11-13','local-test');
+assert.equal(JSON.stringify(current),snapshot);
+assert.equal(entry.date,'2026-11-12');
+assert.deepEqual(entry.rows[0],['squat','95','8','','']);
+assert.deepEqual(entry.rows[2],['lock off','','5s','7s','']);
+assert.equal(entry.rows[3][4],'felt strong');
+assert.deepEqual(next.exercises[0].values,[['',''],['','']]);
+assert.deepEqual(next.exercises[0].previous,[[95,8],[135,6]]);
+assert.equal(next.exercises[0].barbell,true);
+assert.equal(next.exercises[0].superset,'a');
+assert.equal(next.exercises[1].unilateral,true);
+assert.equal(next.notes,'');
+assert.equal(next.archivedSessions.length,1);
+assert.throws(()=>prepare(next,'2026-11-13','local-empty'),/empty/);
+next.exercises[0].values[0]=[0,0];
+assert.equal(prepare(next,'2026-11-14','local-zero').next.archivedSessions.length,2);
+assert.throws(()=>prepare({...current,date:''},'2026-11-13','bad'),/date/);
+assert.throws(()=>prepare({...current,date:'2026-02-31'},'2026-11-13','bad'),/date/);
+next.exercises[0].values[0][0]=999;
+assert.equal(entry.exercises[0].values[0][0],95);
+assert.equal(JSON.parse(JSON.stringify(next)).archivedSessions[0].id,'local-test');
+const restored = restore(next,entry,{'local-test:0:1':'105','local-test:3:4':'updated notes'});
+assert.equal(restored.exercises[0].values[0][0],'105');
+assert.equal(restored.notes,'updated notes');
+assert.equal(restored.archivedSessions.length,0);
+assert.equal(restored.exercises[0].barbell,true);
+assert.equal(restored.exercises[1].values[0][1],'7');
+assert.equal(entry.exercises[0].values[0][0],95);
+const legacy={id:'csv-test',date:'2024-01-01',label:'January 1, 2024',heading:['January 1, 2024','weight','L','R'],rows:[['squat','175 - 35s/25s/5s','8','','setup note'],['','','x','','']]};
+const legacyRestored=restore(current,legacy,{'csv-test:0:2':'9'});
+assert.equal(legacyRestored.exercises[0].values[0][0],'175 - 35s/25s/5s');
+assert.equal(legacyRestored.exercises[0].values[0][1],'9');
+assert.equal(legacyRestored.exercises[0].values[1][1],'x');
+assert.deepEqual(legacyRestored.removedArchiveIds,['csv-test']);
+assert(legacyRestored.notes.includes('setup note'));
+console.log('PASS: archive/reset, local and legacy restore, edited values, notes, modifiers, persistence, validation, and no mutation');
