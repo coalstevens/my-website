@@ -7,7 +7,7 @@
 
 * { box-sizing: border-box; }
 body { margin: 0; color: var(--ink); background: #e5e0d5; font: 15px/1.5 var(--mono); text-transform: lowercase; }
-main { max-width: 1240px; margin: auto; padding: 16px 24px 0; }
+main { max-width: 1240px; margin: auto; padding: 16px 24px 48px; }
 h1, h2, h3 { font-family: Georgia, 'Times New Roman', serif; }
 h1 { font-size: clamp(32px, 4vw, 46px); font-weight: 400; letter-spacing: -1.8px; line-height: 1.1; margin: 6px 0; }
 h2 { font-size: 23px; margin: 12px 0; }
@@ -269,7 +269,7 @@ body.page-zooming main { transform-origin: 50% 160px; will-change: transform, op
   aside { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; align-items: start; }
 }
 @media (max-width: 580px) {
-  main { padding: 10px 12px 0; }
+  main { padding: 10px 12px 48px; }
   .intro { display: block; padding: 14px 0; }
   .intro > .zoom-link { margin-top: 14px; }
   .layout { gap: 16px; }

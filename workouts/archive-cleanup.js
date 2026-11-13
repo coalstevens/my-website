@@ -21,8 +21,7 @@ const ArchiveCleanup = (() => {
   const base = text => normalize(text).replace(/\s*--?\s*ss(?:\s*[a-d])?\s*$/i,'');
   function title(text) {
     const key=base(text);
-    const suffix=normalize(text).slice(key.length);
-    return (Object.hasOwn(aliases,key) ? aliases[key] : key)+suffix;
+    return Object.hasOwn(aliases,key) ? aliases[key] : key;
   }
   function appendNote(row,text) {
     while(row.length<5) row.push('');
@@ -68,7 +67,7 @@ const ArchiveCleanup = (() => {
     return session;
   }
   function migrateStorage(imported) {
-    const version='training-archive-cleanup-v1';
+    const version='training-archive-cleanup-v2';
     if(localStorage.getItem(version)==='done') return false;
     const stateKey='training-design-prototype-v1',editKey='training-archive-cell-edits-v1';
     const originalState=localStorage.getItem(stateKey),originalEdits=localStorage.getItem(editKey);
