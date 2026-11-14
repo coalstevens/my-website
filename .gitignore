@@ -4,3 +4,22 @@
 # Python maintenance tools
 __pycache__/
 *.py[cod]
+
+# Local environment and credentials
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*service-account*.json
+*serviceAccount*.json
+firebase-adminsdk*.json
+
+# Local Firebase tooling
+.firebase/
+firebase-debug.log*
+firestore-debug.log*
+ui-debug.log*
+
+# Dependencies, if introduced later
+node_modules/
