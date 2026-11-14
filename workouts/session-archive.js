@@ -6,6 +6,9 @@ const SessionArchive = (() => {
         new Date(current.date).toISOString().slice(0,10) !== current.date) {
       throw new Error('choose a valid workout date before archiving.');
     }
+    if (current.exercises.some(e => !e.name.trim() && e.values.some(row => row.some(value => String(value ?? '').trim() !== '')))) {
+      throw new Error('name each exercise with recorded results before archiving.');
+    }
     const hasValues = current.exercises.some(e => e.values.some(row => row.some(value => String(value ?? '').trim() !== '')));
     if (!hasValues && !current.notes?.trim()) throw new Error('this session is empty. add results or notes before archiving.');
     const copy = value => JSON.parse(JSON.stringify(value));
@@ -29,12 +32,12 @@ const SessionArchive = (() => {
       exercise.values.forEach((row, i) => rows.push([
         i === 0 ? exercise.name : '',
         weight < 0 ? '' : String(row[weight] ?? ''),
-        sideResult(row,0), sideResult(row,1), ''
+        sideResult(row,0), sideResult(row,1), i === 0 ? (exercise.notes || '') : ''
       ]));
     }
     if (current.notes?.trim()) rows.push(['session notes','','','',current.notes]);
     const entry = {
-      id, date:current.date, label, local:true,
+      id, date:current.date, label, local:true, notes:current.notes || '',
       heading:[label,'weight / setup','left / both','right','notes'], rows,
       // Retain the complete template, not just its table representation.
       exercises:copy(current.exercises)
@@ -75,7 +78,10 @@ const SessionArchive = (() => {
         const results = exercise.fields.map((_, i) => i).filter(i => i !== weight);
         exercise.values = exercise.values.map((values, index) => {
           const row = rows[ri++];
-          if (index === 0 && row[0]) exercise.name = row[0];
+          if (index === 0) {
+            if (row[0]) exercise.name = row[0];
+            if (row[4] || Object.hasOwn(edits, `${entry.id}:${ri-1}:4`)) exercise.notes = row[4] || '';
+          }
           const updated = [...values];
           if (weight >= 0) updated[weight] = row[1];
           const splitRepeaters = exercise.measurement === 'repeaters' && !exercise.fields.some(field => /reps ×/i.test(field));
@@ -129,6 +135,17 @@ const SessionArchive = (() => {
       removedArchiveIds:entry.local ? [...(current.removedArchiveIds || [])] : [...new Set([...(current.removedArchiveIds || []),entry.id])]
     };
   }
-  return {prepare,restore};
+  function copyFormat(current, entry, edits = {}) {
+    const {exercises} = restore(current, entry, edits);
+    for (const exercise of exercises) {
+      exercise.previous = exercise.values.map(row => [...row]);
+      exercise.values = exercise.values.map(() => exercise.fields.map(() => ''));
+      delete exercise.weightBackup;
+      delete exercise.measurementBackup;
+      delete exercise.resultRightBackup;
+    }
+    return {...JSON.parse(JSON.stringify(current)), exercises};
+  }
+  return {prepare,restore,copyFormat};
 })();
 if (typeof module !== 'undefined') module.exports = SessionArchive;

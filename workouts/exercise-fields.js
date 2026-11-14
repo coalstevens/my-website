@@ -44,6 +44,11 @@ const ExerciseFields = (() => {
       data[property]=data[property].map((sides,i)=>sides.map((result,side)=> {
         const saved=exercise.measurementBackup[property][i]?.[side] || {};
         const merged={...saved,...result};
+        // Reps and duration share one entry per side: changing the label
+        // should keep the current entry, not replace it with a blank/old value.
+        if (data.mode !== mode && ['reps','duration'].includes(data.mode) && ['reps','duration'].includes(mode)) {
+          merged[mode] = result[data.mode];
+        }
         exercise.measurementBackup[property][i] ||= [];
         exercise.measurementBackup[property][i][side]=copy(merged);
         return merged;
@@ -61,6 +66,17 @@ const ExerciseFields = (() => {
     }
     encode(exercise,data,data.mode,unilateral);
   }
-  return {setMeasurement,setLaterality};
+  function setCount(exercise,count) {
+    if (!Number.isInteger(count) || count < 1 || count > Math.max(20,exercise.values.length)) return;
+    for (const property of ['values','previous']) {
+      exercise[property] = Array.from({length:count},(_,i) =>
+        exercise[property][i] || exercise.fields.map(() => ''));
+      // Removed sets must not reappear through a later modifier change.
+      for (const backup of ['weightBackup','measurementBackup','resultRightBackup']) {
+        if (Array.isArray(exercise[backup]?.[property])) exercise[backup][property].length = Math.min(exercise[backup][property].length,count);
+      }
+    }
+  }
+  return {setMeasurement,setLaterality,setCount};
 })();
 if(typeof module!=='undefined') module.exports=ExerciseFields;

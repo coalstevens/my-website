@@ -57,19 +57,50 @@ const sample = () => ({date: today(), notes: '', exercises: [
   {name:'Bat hang', superset:'A', fields:['Hold · seconds'], previous:[[9],[7],[4],[3]], values:[[9],[7],[4],[3]]},
   {name:'Lock-off · 90°', fields:['Left · seconds','Right · seconds'], previous:[[4,6],[5,7],[4,5],[3,3]], values:[[4,6],[5,7],[4,5],[3,3]]}
 ]});
+// Demo state never reads private account state. Preserve pre-account data for
+// an intentional migration rather than importing it into every new user.
+try {
+  if (!localStorage.getItem('training-view-scope-v2') && localStorage.getItem(key)) {
+    localStorage.setItem('training-legacy-backup-v2', JSON.stringify({state:JSON.parse(localStorage.getItem(key)), archiveEdits:JSON.parse(localStorage.getItem('training-archive-cell-edits-v1') || '{}')}));
+  }
+} catch {}
+let viewScope = 'demo';
 let state = sample();
-try { const saved = JSON.parse(localStorage.getItem(key)); if(saved && Array.isArray(saved.exercises) && saved.exercises.length && saved.exercises.every(e => Array.isArray(e.values) && Array.isArray(e.fields) && Array.isArray(e.previous))) state = saved; } catch {}
-// Migrate the existing prototype session without resetting edited values.
-for (const exercise of state.exercises) {
-  if (exercise.barbell === undefined) exercise.barbell = exercise.name.toLowerCase() === 'squat';
-  if (exercise.unilateral === undefined) exercise.unilateral = exercise.fields.some(field => /^left/i.test(field));
-  if (exercise.superset === undefined) exercise.superset = exercise.tag?.match(/SUPERSET ([A-D])/i)?.[1].toUpperCase() || '';
+const newExercise = () => ({id:crypto.randomUUID(), name:'', notes:'', fields:['Reps'], values:[[''],[''],['']], previous:[[''],[''],['']], weighted:false, barbell:false, unilateral:false, superset:'', measurement:'reps'});
+const blankSession = () => ({date:today(), notes:'', exercises:Array.from({length:4}, newExercise), archivedSessions:[]});
+function storeWorkingCopy() {
+  localStorage.setItem(key, JSON.stringify(state));
+  localStorage.setItem('training-view-scope-v2', viewScope);
 }
 const pencilIcon = '<svg viewBox="0 0 16 16" width="12" height="12" aria-hidden="true"><path d="m10.5 2.5 3 3M2 14l3.5-1 8-8a2.12 2.12 0 0 0-3-3l-8 8L2 14Z" fill="none" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>';
 const escape = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const archiveFeedback = ArchiveFeedback.create(document.querySelector('#archive-action-status'));
+function notifyCloud() {
+  archiveFeedback.clear();
+  window.dispatchEvent(new Event('workout-local-change'));
+}
+function showArchiveUndo(message, previousState, previousArchiveId) {
+  archiveFeedback.show(message, () => {
+    try { localStorage.setItem(key, JSON.stringify(previousState)); }
+    catch {
+      document.querySelector('#archive-action-status > span').textContent = 'could not undo locally — try again';
+      return false;
+    }
+    state = previousState;
+    activeArchiveId = previousArchiveId;
+    editingExercises.clear();
+    render();
+    updatePlateSuggestions();
+    renderHistory();
+    notifyCloud();
+    document.querySelector('#push-archive').focus();
+    return true;
+  });
+}
 function save() {
-  try { localStorage.setItem(key, JSON.stringify(state)); document.querySelector('#save-status').textContent = 'Saved on this device · not synced'; }
-  catch { document.querySelector('#save-status').textContent = 'Unable to save — keep this tab open'; }
+  try { storeWorkingCopy(); document.querySelector('#save-status').textContent = viewScope === 'demo' ? 'Demo changes only' : 'Saved locally · syncing'; }
+  catch { document.querySelector('#save-status').textContent = 'Unable to save locally — keep this tab open'; }
+  notifyCloud();
 }
 function setWeighted(exercise, weighted) {
   const index = exercise.fields.findIndex(field => /weight/i.test(field));
@@ -93,11 +124,12 @@ const setLaterality = ExerciseFields.setLaterality;
 const editingExercises = new Set();
 function exerciseModifiers(exercise, ei) {
   return `<div class="exercise-modifiers">
-    <label><input type="checkbox" data-weighted="${ei}" ${exercise.weighted ? 'checked' : ''}> weighted</label>
+    <div class="exercise-toggle-options"><label><input type="checkbox" data-weighted="${ei}" ${exercise.weighted ? 'checked' : ''}> weighted</label>
     <label><input type="checkbox" data-barbell="${ei}" ${exercise.barbell ? 'checked' : ''}> barbell</label>
-    <label><input type="checkbox" data-unilateral="${ei}" ${exercise.unilateral ? 'checked' : ''}> unilateral</label>
+    <label><input type="checkbox" data-unilateral="${ei}" ${exercise.unilateral ? 'checked' : ''}> unilateral</label></div>
+    <div class="exercise-select-options"><label class="set-count-control"><span>sets</span><select data-set-count="${ei}" aria-label="${escape(exercise.name)} number of sets">${Array.from({length:Math.max(20,exercise.values.length)},(_,i)=>`<option value="${i+1}" ${exercise.values.length === i+1 ? 'selected' : ''}>${i+1}</option>`).join('')}</select></label>
     <label class="measurement-control"><span>measure</span><select data-measurement="${ei}" aria-label="${escape(exercise.name)} measurement"><option value="reps" ${exercise.measurement === 'reps' ? 'selected' : ''}>reps</option><option value="duration" ${exercise.measurement === 'duration' ? 'selected' : ''}>duration</option><option value="repeaters" ${exercise.measurement === 'repeaters' ? 'selected' : ''}>repeaters</option></select></label>
-    <label class="superset-control"><span>superset</span><select data-superset="${ei}" aria-label="${escape(exercise.name)} superset group"><option value="">none</option>${['A','B','C','D'].map(group => `<option value="${group}" ${exercise.superset === group ? 'selected' : ''}>${group.toLowerCase()}</option>`).join('')}</select></label>
+    <label class="superset-control"><span>superset</span><select data-superset="${ei}" aria-label="${escape(exercise.name)} superset group"><option value="">none</option>${['A','B','C','D'].map(group => `<option value="${group}" ${exercise.superset === group ? 'selected' : ''}>${group.toLowerCase()}</option>`).join('')}</select></label></div>
   </div>`;
 }
 function formatWorkoutDate(value) {
@@ -109,10 +141,10 @@ let currentAnalysisHistory = null;
 function renderCurrentAnalysis() {
   const container = document.querySelector('#current-exercise-stats');
   if (currentAnalysisHistory === null) { container.innerHTML = '<p>loading history…</p>'; return; }
-  const sets = HistoryAnalysis.records(currentAnalysisHistory, archiveEdits).sets;
+  const sets = HistoryAnalysis.records(currentAnalysisHistory, archiveEdits, state.exercises).sets;
   const number = value => Number(value.toFixed(2)).toLocaleString('en-US');
   container.innerHTML = `<ul class="widget-exercise-stats">${state.exercises.map(exercise => {
-    const stats = HistoryAnalysis.exerciseSnapshot(sets, exercise.name);
+    const stats = HistoryAnalysis.exerciseSnapshot(sets, exercise.name, new Date().getFullYear(), exercise.id);
     const best = [
       stats.load !== null ? `${number(stats.load)} lb` : '',
       stats.reps !== null ? `${number(stats.reps)} reps` : '',
@@ -120,11 +152,17 @@ function renderCurrentAnalysis() {
       stats.repeaters !== null ? `${number(stats.repeaters)}s repeater work` : ''
     ].filter(Boolean).join(' · ');
     const latest = stats.lastDate ? new Date(`${stats.lastDate}T12:00:00`).toLocaleDateString('en-US', {month:'short', day:'numeric'}) : '';
-    return `<li><div class="widget-exercise-heading"><a href="analysis.html?exercise=${encodeURIComponent(stats.exercise)}" data-zoom="out">${escape(exercise.name)}</a><span><span aria-label="${stats.sessionsThisYear} sessions this year">${stats.sessionsThisYear} ${stats.sessionsThisYear === 1 ? 'session' : 'sessions'} this year</span>${latest ? ` · last: <time datetime="${stats.lastDate}" title="Last session: ${escape(formatWorkoutDate(stats.lastDate))}">${escape(latest)}</time>` : ''}</span></div>${stats.sessions ? `<p>best: ${escape(best)}</p>` : '<p>no archived results yet</p>'}</li>`;
+    return `<li><div class="widget-exercise-heading"><a href="analysis.html?exercise=${encodeURIComponent(stats.exercise)}" data-zoom="out">${escape(exercise.name || 'unnamed exercise')}</a><span><span aria-label="${stats.sessionsThisYear} sessions this year">${stats.sessionsThisYear} ${stats.sessionsThisYear === 1 ? 'session' : 'sessions'} this year</span>${latest ? ` · last: <time datetime="${stats.lastDate}" title="Last session: ${escape(formatWorkoutDate(stats.lastDate))}">${escape(latest)}</time>` : ''}</span></div>${stats.sessions ? `<p>best: ${escape(best)}</p>` : '<p>no archived results yet</p>'}</li>`;
   }).join('')}</ul>`;
 }
 function render() {
+  // Normalize every loaded template, including demo resets and account snapshots.
   for (const exercise of state.exercises) {
+    if (exercise.barbell === undefined) exercise.barbell = exercise.name.toLowerCase() === 'squat';
+    if (exercise.unilateral === undefined) exercise.unilateral = exercise.fields.some(field => /^left/i.test(field));
+    if (exercise.superset === undefined) exercise.superset = exercise.tag?.match(/SUPERSET ([A-D])/i)?.[1].toUpperCase() || '';
+    if (!exercise.id) exercise.id = crypto.randomUUID();
+    if (exercise.notes === undefined) exercise.notes = '';
     if (exercise.weighted === undefined) exercise.weighted = exercise.fields.some(field => /weight/i.test(field));
     if (exercise.measurement === undefined) exercise.measurement = exercise.fields.some(field => /reps × seconds/i.test(field)) ? 'repeaters' : exercise.fields.some(field => /seconds/i.test(field)) ? 'duration' : 'reps';
     if (exercise.measurement === 'repeaters' && exercise.fields.some(field => /reps × seconds/i.test(field))) setMeasurement(exercise, 'repeaters');
@@ -133,7 +171,7 @@ function render() {
   document.querySelector('#date-display').textContent = formatWorkoutDate(state.date);
   document.querySelector('#notes').value = state.notes;
   document.querySelector('#exercises').innerHTML = state.exercises.map((exercise, ei) => `
-    <article class="exercise${editingExercises.has(ei) ? ' template-editing' : ''}"><div class="exercise-heading"><button type="button" class="template-edit" data-edit-template="${ei}" aria-label="${editingExercises.has(ei) ? 'Finish editing' : 'Edit'} ${escape(exercise.name)} template" aria-expanded="${editingExercises.has(ei)}" title="${editingExercises.has(ei) ? 'Done editing template' : 'Edit exercise template'}">${editingExercises.has(ei) ? 'done' : pencilIcon}</button><div><h2>${escape(exercise.name)}</h2><p class="exercise-subtitle">${exercise.barbell ? 'barbell' : exercise.weighted ? 'weighted' : 'bodyweight'} · ${exercise.unilateral ? 'left / right' : 'both sides'}</p></div>${exercise.superset ? `<span class="exercise-tag" data-superset-color="${escape(exercise.superset)}" title="superset ${escape(exercise.superset.toLowerCase())}"><svg class="superset-emblem" viewBox="0 0 28 25" role="img" aria-label="superset ${escape(exercise.superset)}"><path d="M3 6 8 2h12l5 4-11 17Z" fill="none" stroke="currentColor" stroke-width="0.8" stroke-linejoin="round"/><text x="14" y="15" text-anchor="middle">S</text></svg></span>` : ''}${editingExercises.has(ei) ? exerciseModifiers(exercise, ei) : ''}</div>
+    <article class="exercise${editingExercises.has(ei) ? ' template-editing' : ''}"><div class="exercise-heading"><button type="button" class="template-edit" data-edit-template="${ei}" aria-label="${editingExercises.has(ei) ? 'Finish editing' : 'Edit'} ${escape(exercise.name)} template" aria-expanded="${editingExercises.has(ei)}" title="${editingExercises.has(ei) ? 'Done editing template' : 'Edit exercise template'}">${editingExercises.has(ei) ? 'done' : pencilIcon}</button><div>${editingExercises.has(ei) || !exercise.name ? `<label class="exercise-name-label" for="exercise-name-${ei}">exercise name</label><input class="exercise-name-input" id="exercise-name-${ei}" data-exercise-name="${ei}" placeholder="Exercise name" maxlength="160" value="${escape(exercise.name)}">` : `<h2>${escape(exercise.name)}</h2>`}<p class="exercise-subtitle">${exercise.barbell ? 'barbell' : exercise.weighted ? 'weighted' : 'bodyweight'}</p>${editingExercises.has(ei) ? `<label for="exercise-notes-${ei}">exercise notes</label><textarea class="exercise-notes-input" id="exercise-notes-${ei}" data-exercise-notes="${ei}" maxlength="2000" placeholder="Setup, cues, rest time…">${escape(exercise.notes)}</textarea>` : exercise.notes ? `<p class="exercise-notes">${escape(exercise.notes)}</p>` : ''}</div>${exercise.superset && !editingExercises.has(ei) ? `<span class="exercise-tag" data-superset-color="${escape(exercise.superset)}" title="superset ${escape(exercise.superset.toLowerCase())}"><svg class="superset-emblem" viewBox="0 0 28 25" role="img" aria-label="superset ${escape(exercise.superset)}"><path d="M3 6 8 2h12l5 4-11 17Z" fill="none" stroke="currentColor" stroke-width="0.8" stroke-linejoin="round"/><text x="14" y="15" text-anchor="middle">S</text></svg></span>` : ''}${editingExercises.has(ei) ? exerciseModifiers(exercise, ei) : ''}</div>
     <div class="sets" style="--result-columns: ${exercise.fields.length}"><div class="set-columns" aria-hidden="true"><span>SET</span>${exercise.fields.map(field => `<span>${escape(field)}</span>`).join('')}</div>${exercise.values.map((set, si) => `<div class="set-row"><span class="set-number">${String(si+1).padStart(2,'0')}</span>${set.map((v, fi) => `<div><label for="value-${ei}-${si}-${fi}">${escape(exercise.fields[fi])}</label><span class="field-entry"><input id="value-${ei}-${si}-${fi}" aria-label="${escape(exercise.name)}, set ${si+1}, ${escape(exercise.fields[fi])}" data-exercise="${ei}" data-set="${si}" data-field="${fi}" type="${String(v).trim() !== '' && !Number.isFinite(Number(v)) ? 'text' : 'number'}" inputmode="decimal" min="0" step="any" value="${escape(v)}">${/weight/i.test(exercise.fields[fi]) ? `<span class="plate-suggestion" data-plate-exercise="${ei}" data-plate-set="${si}" data-plate-field="${fi}" ${exercise.barbell ? '' : 'hidden'}></span>` : ''}</span><span class="previous" title="Previous workout" aria-label="Previous: ${escape(exercise.previous[si][fi])}">was ${escape(exercise.previous[si][fi])}</span></div>`).join('')}</div>`).join('')}</div>
     ${exercise.setup !== undefined && exercise.name.toLowerCase() !== 'squat' ? `<div class="setup"><label for="setup-${ei}">PLATE SETUP</label><input id="setup-${ei}" data-setup="${ei}" value="${escape(exercise.setup)}"></div>` : ''}</article>`).join('');
   renderCurrentAnalysis();
@@ -150,7 +188,22 @@ document.querySelector('#exercises').addEventListener('click', event => {
 });
 document.querySelector('#exercises').addEventListener('input', event => {
   const input = event.target;
-  if(input.dataset.weighted !== undefined) {
+  if (input.dataset.exerciseName !== undefined) {
+    state.exercises[input.dataset.exerciseName].name = input.value;
+    renderCurrentAnalysis();
+  } else if (input.dataset.exerciseNotes !== undefined) {
+    state.exercises[input.dataset.exerciseNotes].notes = input.value;
+  } else if(input.dataset.setCount !== undefined) {
+    const exercise = state.exercises[input.dataset.setCount];
+    const count = Number(input.value);
+    const removesResults = exercise.values.slice(count).some(row => row.some(value => String(value ?? '').trim() !== ''));
+    if (removesResults && !confirm('Remove these sets and their recorded results?')) {
+      input.value = String(exercise.values.length);
+      return;
+    }
+    ExerciseFields.setCount(exercise, count);
+    render();
+  } else if(input.dataset.weighted !== undefined) {
     setWeighted(state.exercises[input.dataset.weighted], input.checked);
     render();
   } else if(input.dataset.measurement !== undefined) {
@@ -258,6 +311,7 @@ function showArchiveCard(index, animate = false) {
     document.querySelector('#archive-newer').disabled = true;
     document.querySelector('#archive-older').disabled = true;
     activeArchiveId = null;
+    document.querySelector('#archive-card-actions').hidden = true;
     document.querySelector('#archive-peeks').replaceChildren();
     return;
   }
@@ -271,6 +325,15 @@ function showArchiveCard(index, animate = false) {
   const oldHeight = shouldAnimate ? viewport.getBoundingClientRect().height : 0;
   cards.forEach((card, i) => { card.hidden = i !== index; });
   activeArchiveId = incoming.id;
+  const actions = document.querySelector('#archive-card-actions');
+  actions.hidden = false;
+  actions.querySelector('[data-delete-archived]').dataset.deleteArchived = incoming.id;
+  actions.querySelector('[data-copy-format]').dataset.copyFormat = incoming.id;
+  const editButton = actions.querySelector('[data-edit-archive]');
+  const editing = incoming.classList.contains('archive-editing');
+  editButton.textContent = editing ? 'done' : 'edit';
+  editButton.setAttribute('aria-expanded', String(editing));
+  editButton.setAttribute('aria-label', `${editing ? 'Finish editing' : 'Edit'} workout from ${incoming.querySelector('time').textContent}`);
   if (shouldAnimate) {
     const newHeight = incoming.getBoundingClientRect().height;
     const direction = index > previousIndex ? 1 : -1;
@@ -426,18 +489,26 @@ function renderLastSessionNotes() {
 }
 const archiveEditKey = 'training-archive-cell-edits-v1';
 let archiveEdits = {};
-try {
-  const saved = JSON.parse(localStorage.getItem(archiveEditKey));
-  if (saved && typeof saved === 'object' && !Array.isArray(saved)) archiveEdits = saved;
-} catch {}
-document.querySelector('#history-workouts').addEventListener('click', event => {
+// Account archive edits are supplied only after authentication.
+document.querySelector('#archive-card-actions').addEventListener('click', event => {
   const button = event.target.closest('[data-edit-archive]');
   if (!button) return;
-  const article = button.closest('.archive-workout');
+  const article = document.getElementById(activeArchiveId);
+  if (!article) return;
   const editing = article.classList.toggle('archive-editing');
-  button.innerHTML = editing ? 'done' : pencilIcon;
+  button.textContent = editing ? 'done' : 'edit';
   button.setAttribute('aria-expanded', String(editing));
   button.setAttribute('aria-label', `${editing ? 'Finish editing' : 'Edit'} workout from ${article.querySelector('time').textContent}`);
+  const time = article.querySelector('time');
+  if (editing) {
+    const dateInput = document.createElement('input');
+    dateInput.type = 'date';
+    dateInput.value = time.dateTime;
+    dateInput.dataset.archiveDate = article.id;
+    dateInput.setAttribute('aria-label', 'Archived workout date');
+    time.hidden = true;
+    time.after(dateInput);
+  }
   for (const cell of article.querySelectorAll('[data-archive-cell]')) {
     if (editing) {
       const input = document.createElement('input');
@@ -449,6 +520,33 @@ document.querySelector('#history-workouts').addEventListener('click', event => {
       cell.textContent = cell.querySelector('input').value;
     }
   }
+  if (!editing) renderHistory();
+});
+document.querySelector('#history-workouts').addEventListener('change', event => {
+  const input = event.target;
+  if (input.dataset.archiveDate === undefined || !input.value || !input.validity.valid) return;
+  const entry = archivedWorkouts.find(workout => workout.id === input.dataset.archiveDate);
+  if (!entry) return;
+  const oldDate = entry.date;
+  entry.date = input.value;
+  try {
+    storeWorkingCopy();
+    localStorage.setItem('training-cloud-history-v1', JSON.stringify(importedWorkouts));
+  } catch {
+    entry.date = oldDate;
+    input.value = oldDate;
+    document.querySelector('#history-status').textContent = 'could not save the date. please try again.';
+    return;
+  }
+  const article = input.closest('.archive-workout');
+  const time = article.querySelector('time');
+  time.dateTime = entry.date;
+  time.textContent = formatWorkoutDate(entry.date);
+  article.setAttribute('aria-label', `Session from ${formatWorkoutDate(entry.date)}`);
+  renderLastSessionNotes();
+  renderCurrentAnalysis();
+  document.querySelector('#history-status').textContent = 'archive date saved locally';
+  notifyCloud();
 });
 document.querySelector('#history-workouts').addEventListener('input', event => {
   const cell = event.target.closest('[data-archive-cell]');
@@ -458,10 +556,11 @@ document.querySelector('#history-workouts').addEventListener('input', event => {
   const status = document.querySelector('#history-status');
   try {
     localStorage.setItem(archiveEditKey, JSON.stringify(archiveEdits));
-    status.textContent = 'archive edits saved on this device · not synced';
+    status.textContent = viewScope === 'demo' ? 'demo archive edited' : 'archive edits saved locally · syncing';
   } catch {
-    status.textContent = 'unable to save archive edits — keep this tab open';
+    status.textContent = 'unable to save archive edits locally — keep this tab open';
   }
+  notifyCloud();
 });
 function renderHistory() {
     finishCarouselTransition();
@@ -503,37 +602,63 @@ function renderHistory() {
       };
       const rows = groups.map(group => `<tbody class="archive-exercise">${group.map(({row,ri}, si) => `<tr>${si === 0 ? cell(row,ri,0,`class="archive-exercise-title" rowspan="${group.length}"`) : ''}<td class="archive-set-number">${String(si+1).padStart(2,'0')}</td>${columns.filter(i => i !== 0).map(i => cell(row,ri,i)).join('')}</tr>`).join('')}</tbody>`).join('');
       return `<article class="archive-workout" id="${escape(workout.id)}" role="group" aria-roledescription="slide" aria-label="Session from ${escape(formatWorkoutDate(workout.date))}">
-        <div class="archive-heading"><h3><time datetime="${escape(workout.date)}">${escape(formatWorkoutDate(workout.date))}</time></h3>${duplicate || workout.inferredYear ? `<span class="archive-detail">${duplicate ? `entry ${seen.get(workout.date)} of ${counts.get(workout.date)}` : ''}${duplicate && workout.inferredYear ? ' · ' : ''}${workout.inferredYear ? 'year inferred: 2024' : ''}</span>` : ''}<button type="button" class="archive-edit" data-edit-archive aria-expanded="false" aria-label="Edit workout from ${escape(workout.label)}" title="Edit archived workout">${pencilIcon}</button></div>
+        <div class="archive-heading"><h3><time datetime="${escape(workout.date)}">${escape(formatWorkoutDate(workout.date))}</time></h3>${duplicate || workout.inferredYear ? `<span class="archive-detail">${duplicate ? `entry ${seen.get(workout.date)} of ${counts.get(workout.date)}` : ''}${duplicate && workout.inferredYear ? ' · ' : ''}${workout.inferredYear ? 'year inferred: 2024' : ''}</span>` : ''}</div>
         <div class="archive-scroll" tabindex="0" role="region" aria-label="Workout from ${escape(workout.label)}"><table><thead><tr>${header}</tr></thead>${rows}</table></div>
       </article>`;
     }).join('');
     const activeIndex = workouts.findIndex(workout => workout.id === activeArchiveId);
     showArchiveCard(activeIndex < 0 ? 0 : activeIndex);
-    status.textContent = `${workouts.length} workouts · newest first · edits saved on this device only`;
+    status.textContent = workouts.length ? `${workouts.length} workouts · newest first${viewScope === 'demo' ? ' · demo archive' : ''}` : 'no archived workouts yet';
 }
+document.querySelector('#archive-card-actions').addEventListener('click', event => {
+  const button = event.target.closest('[data-delete-archived], [data-copy-format]');
+  if (!button) return;
+  const deleting = button.dataset.deleteArchived !== undefined;
+  const entry = archivedWorkouts.find(workout => workout.id === (deleting ? button.dataset.deleteArchived : button.dataset.copyFormat));
+  if (!entry) return;
+  const message = deleting
+    ? `Delete the archived workout from ${formatWorkoutDate(entry.date)}?`
+    : `Copy the format from ${formatWorkoutDate(entry.date)} to the current workout? This replaces the current exercises and results with blank sets. The archive, current date, and session notes will be kept.`;
+  if (!confirm(message)) return;
+  const status = document.querySelector('#archive-action-status');
+  let next;
+  try {
+    next = deleting ? {
+      ...state,
+      archivedSessions: (state.archivedSessions || []).filter(workout => workout.id !== entry.id),
+      removedArchiveIds: [...new Set([...(state.removedArchiveIds || []), entry.id])]
+    } : SessionArchive.copyFormat(state, entry, archiveEdits);
+    localStorage.setItem(key, JSON.stringify(next));
+  } catch {
+    status.textContent = 'could not save the change. your workout and archive have not been changed.';
+    return;
+  }
+  archiveFeedback.clear();
+  state = next;
+  editingExercises.clear();
+  render();
+  updatePlateSuggestions();
+  renderHistory();
+  save();
+  status.textContent = deleting ? 'archived workout deleted' : 'workout format copied';
+  document.querySelector(deleting ? '#archive-newer' : '#push-archive').focus();
+});
 async function loadHistory() {
   try {
     const response = await fetch('history.json');
     if (!response.ok) throw new Error(`History request failed: ${response.status}`);
     const {workouts} = await response.json();
-    importedWorkouts = workouts;
-    try {
-      if (ArchiveCleanup.migrateStorage(importedWorkouts)) {
-        const storedState = localStorage.getItem(key);
-        if (storedState) state = JSON.parse(storedState);
-        archiveEdits = JSON.parse(localStorage.getItem(archiveEditKey) || '{}');
-        render();
-        updatePlateSuggestions();
-      }
-    } catch (error) {
-      console.error('Archive migration could not be saved; existing browser data retained.', error);
-      document.querySelector('#archive-action-status').textContent = 'could not save archive corrections locally; existing browser data retained. refresh to retry.';
-    }
-    renderHistory();
+    demoHistory = workouts;
+    if (viewScope === 'demo') { importedWorkouts = workouts; renderHistory(); }
   } catch (error) {
-    renderHistory();
-    document.querySelector('#history-status').textContent = 'local sessions shown · could not load imported history. refresh to try again.';
+    if (viewScope === 'demo') {
+      renderHistory();
+      document.querySelector('#history-status').textContent = 'could not load demo history. refresh to try again.';
+    }
     console.error(error);
+  } finally {
+    window.WorkoutCloudBridge.ready = true;
+    window.dispatchEvent(new Event('workout-history-ready'));
   }
 }
 const pushArchive = document.querySelector('#push-archive');
@@ -545,8 +670,7 @@ function showArchiveConfirmation(show) {
   document.querySelector(show ? '#archive-no' : '#push-archive').focus();
 }
 pushArchive.addEventListener('click', () => {
-  document.querySelector('#archive-action-status').textContent = '';
-  showPopConfirmation(false);
+  archiveFeedback.clear();
   showArchiveConfirmation(true);
 });
 document.querySelector('#archive-no').addEventListener('click', () => showArchiveConfirmation(false));
@@ -555,6 +679,8 @@ archiveConfirm.addEventListener('keydown', event => {
 });
 document.querySelector('#archive-yes').addEventListener('click', () => {
   const status = document.querySelector('#archive-action-status');
+  const previousState = JSON.parse(JSON.stringify(state));
+  const previousArchiveId = activeArchiveId;
   let next;
   try {
     ({next} = SessionArchive.prepare(state, today(), `local-${crypto.randomUUID()}`));
@@ -568,66 +694,53 @@ document.querySelector('#archive-yes').addEventListener('click', () => {
   }
   const motionSnapshot = ArchiveMotion.capture(document.querySelector('#exercises'));
   state = next;
+  notifyCloud();
   activeArchiveId = state.archivedSessions[0].id;
   editingExercises.clear();
   render();
   updatePlateSuggestions();
   renderHistory();
-  document.querySelector('#save-status').textContent = 'Saved on this device · not synced';
-  status.textContent = 'session archived · fresh session ready · saved on this device';
   showArchiveConfirmation(false);
+  showArchiveUndo('session archived', previousState, previousArchiveId);
   ArchiveMotion.play('push', motionSnapshot);
 });
-const popArchive = document.querySelector('#pop-archive');
-const popConfirm = document.querySelector('#pop-confirm');
-let pendingPopId = null;
-function showPopConfirmation(show) {
-  popArchive.hidden = show;
-  popArchive.setAttribute('aria-expanded', String(show));
-  popConfirm.hidden = !show;
-  if (!show) pendingPopId = null;
-}
-popArchive.addEventListener('click', () => {
-  const entry = archivedWorkouts[0];
-  const status = document.querySelector('#archive-action-status');
-  if (!entry) { status.textContent = 'the archive is empty.'; return; }
-  showArchiveConfirmation(false);
-  pendingPopId = entry.id;
-  document.querySelector('#pop-warning').textContent = `restore ${formatWorkoutDate(entry.date)}? this will overwrite the existing workout and notes.`;
-  status.textContent = '';
-  showPopConfirmation(true);
-  document.querySelector('#pop-no').focus();
-});
-document.querySelector('#pop-no').addEventListener('click', () => {
-  showPopConfirmation(false);
-  popArchive.focus();
-});
-popConfirm.addEventListener('keydown', event => {
-  if (event.key === 'Escape') { showPopConfirmation(false); popArchive.focus(); }
-});
-document.querySelector('#pop-yes').addEventListener('click', () => {
-  const entry = archivedWorkouts.find(workout => workout.id === pendingPopId);
-  const status = document.querySelector('#archive-action-status');
-  if (!entry) { status.textContent = 'that session is no longer available.'; return; }
-  let next;
-  try {
-    next = SessionArchive.restore(state, entry, archiveEdits);
-    localStorage.setItem(key, JSON.stringify(next));
-  } catch {
-    status.textContent = 'could not restore the session. your workout and archive have not been changed.';
-    return;
+let demoHistory = [];
+window.WorkoutCloudBridge = {
+  ready: true,
+  blank() { return {state:blankSession(), archiveEdits:{}, importedWorkouts:[]}; },
+  lock(locked) {
+    if (locked) archiveFeedback.clear();
+    document.querySelector('#workout-content').disabled = locked;
+    document.querySelector('#date').disabled = locked;
+  },
+  demo() {
+    this.apply({state:sample(), archiveEdits:{}, importedWorkouts:demoHistory}, 'demo');
+    this.lock(false);
+  },
+  snapshot() {
+    return JSON.parse(JSON.stringify({state, archiveEdits, importedWorkouts}));
+  },
+  apply(snapshot, scope = viewScope) {
+    if (!Array.isArray(snapshot?.state?.exercises) || !snapshot.state.exercises.length ||
+        !snapshot.state.exercises.every(e => Array.isArray(e.values) && Array.isArray(e.fields) && Array.isArray(e.previous)) ||
+        !Array.isArray(snapshot.importedWorkouts) || !snapshot.archiveEdits) {
+      throw new Error('Invalid cloud workout data. Local data has not been replaced.');
+    }
+    archiveFeedback.clear();
+    viewScope = scope;
+    state = snapshot.state;
+    archiveEdits = snapshot.archiveEdits;
+    importedWorkouts = snapshot.importedWorkouts;
+    try {
+      storeWorkingCopy();
+      localStorage.setItem(archiveEditKey, JSON.stringify(archiveEdits));
+      localStorage.setItem('training-cloud-history-v1', JSON.stringify(importedWorkouts));
+    } catch (error) { console.warn('Working-view cache unavailable', error); }
+    editingExercises.clear();
+    render();
+    updatePlateSuggestions();
+    renderHistory();
   }
-  const motionSnapshot = ArchiveMotion.capture(document.getElementById(entry.id));
-  state = next;
-  editingExercises.clear();
-  render();
-  updatePlateSuggestions();
-  renderHistory();
-  showPopConfirmation(false);
-  popArchive.focus();
-  document.querySelector('#save-status').textContent = 'Saved on this device · not synced';
-  status.textContent = 'session restored from archive · saved on this device';
-  ArchiveMotion.play('pop', motionSnapshot);
-});
+};
 renderHistory();
 loadHistory();

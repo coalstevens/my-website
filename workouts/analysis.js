@@ -2,19 +2,15 @@ const $ = selector => document.querySelector(selector);
 const escapeHTML = value => String(value).replace(/[&<>"']/g, character => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[character]));
 const formatDate = value => new Date(`${value}T12:00:00`).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}).toLowerCase();
 const display = value => value===null || value===undefined ? '—' : Number(value.toFixed(2)).toLocaleString('en-US');
-let imported = [], sessions = [], sets = [], filteredSets = [], importError = false, storageError = false, migrationError = false;
-function readStored(key, fallback) {
-  try { return JSON.parse(localStorage.getItem(key)) ?? fallback; }
-  catch { storageError = true; return fallback; }
-}
+let sessions = [], sets = [], filteredSets = [];
+let analysisSnapshot = {state:{exercises:[]}, archiveEdits:{}, importedWorkouts:[]};
+let analysisMessage = '';
 function reloadData(resetDates = false) {
-  storageError = false;
-  const state = readStored('training-design-prototype-v1',{});
-  const edits = readStored('training-archive-cell-edits-v1',{});
+  const {state, archiveEdits:edits, importedWorkouts:history} = analysisSnapshot;
   const removed = Array.isArray(state?.removedArchiveIds) ? state.removedArchiveIds : [];
   const local = Array.isArray(state?.archivedSessions) ? state.archivedSessions : [];
-  sessions = [...local,...imported].filter(session=>!removed.includes(session.id) && /^\d{4}-\d{2}-\d{2}$/.test(session.date) && Array.isArray(session.rows)).sort((a,b)=>a.date.localeCompare(b.date));
-  sets = HistoryAnalysis.records(sessions,edits && typeof edits==='object' ? edits : {}).sets;
+  sessions = [...local,...history].filter(session=>!removed.includes(session.id) && /^\d{4}-\d{2}-\d{2}$/.test(session.date) && Array.isArray(session.rows)).sort((a,b)=>a.date.localeCompare(b.date));
+  sets = HistoryAnalysis.records(sessions,edits && typeof edits==='object' ? edits : {}, state.exercises || []).sets;
   if (resetDates || !$('#from-date').value || !$('#to-date').value) setAllDates();
   render();
 }
@@ -103,13 +99,8 @@ function render() {
   frequencyChart(workouts,from,to);
   trendChart();
   $('#analysis-content').hidden=false;
-  const warnings = [
-    importError && 'imported history could not load; local archives only. refresh to retry.',
-    storageError && 'browser storage could not be read; some local data may be missing.',
-    migrationError && 'saved archive corrections could not be written; older local names may still appear. refresh to retry.'
-  ].filter(Boolean);
-  $('#analysis-status').textContent = warnings.join(' · ');
-  $('#analysis-status').hidden = warnings.length === 0;
+  $('#analysis-status').textContent = analysisMessage;
+  $('#analysis-status').hidden = !analysisMessage;
 }
 $('#analysis-filters').addEventListener('submit',event=>{event.preventDefault();render();});
 $('#analysis-filters').addEventListener('change',render);
@@ -130,26 +121,15 @@ $('#exercise-breakdown').addEventListener('click',event=>{
   $('#trend-exercise').focus({preventScroll:true});
   $('#trend-title').scrollIntoView({behavior:window.matchMedia('(prefers-reduced-motion: reduce)').matches?'auto':'smooth',block:'start'});
 });
-window.addEventListener('storage',event=>{
-  if (!event.key || ['training-design-prototype-v1','training-archive-cell-edits-v1'].includes(event.key)) reloadData();
-});
-(async()=>{
-  try {
-    const response=await fetch('history.json');
-    if (!response.ok) throw new Error(`History request failed: ${response.status}`);
-    const data=await response.json();
-    if (!Array.isArray(data.workouts)) throw new Error('Invalid history format');
-    imported=data.workouts;
-  } catch(error) { importError=true; console.error(error); }
-  // Persist legacy corrections once; the analysis itself reads canonical archive cells.
-  if (!importError) {
-    try { ArchiveCleanup.migrateStorage(imported); }
-    catch(error) { migrationError=true; console.error('Could not migrate saved archive data',error); }
+window.WorkoutAnalysisBridge = {
+  apply(snapshot, message = '', resetDates = false) {
+    analysisSnapshot = snapshot;
+    analysisMessage = message;
+    reloadData(resetDates);
+  },
+  message(text) {
+    analysisMessage = text;
+    $('#analysis-status').hidden = !text;
+    $('#analysis-status').textContent = text;
   }
-  try { reloadData(true); }
-  catch(error) {
-    console.error('Workout history initialization failed',error);
-    $('#analysis-status').hidden=false;
-    $('#analysis-status').textContent='could not display workout history. refresh to retry; your saved workouts have not been deleted.';
-  }
-})();
+};

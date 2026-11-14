@@ -16,7 +16,7 @@
 .dark body { background: var(--night-paper); }
 .dark .portfolio-link { color: var(--night-purple); }
 .dark .portfolio-link:focus-visible { outline-color: var(--night-purple); }
-.dark body :is(label, .notes-label, footer, .exercise-subtitle, .set-columns, .set-number, .previous, .plate-suggestion, .setup, .template-edit, .archive-edit, .history-heading, .archive-detail, .archive-page-control, .analysis-caption, .chart-empty) { color: var(--muted); }
+.dark body :is(label, .notes-label, footer, .exercise-subtitle, .exercise-notes, .set-columns, .set-number, .previous, .plate-suggestion, .setup, .template-edit, .history-heading, .archive-detail, .archive-page-control, .analysis-caption, .chart-empty) { color: var(--muted); }
 .dark :is(#history-status, #archive-position, #archive-action-status, #analysis-status, #breakdown-position) { color: var(--muted); }
 .dark .intro { border-top-color: #9cae95; border-bottom-color: var(--night-rule); }
 .dark body :is(input, textarea, select), .dark .date-control { color: var(--ink); background: var(--night-field); border-color: #6d7b62; }
@@ -34,9 +34,9 @@
 .dark .set-row > div:has(.plate-suggestion:not([hidden])):focus-within { background: #414d3b; }
 .dark button { background: #655b73; color: #f0e6f5; border-color: #9786a6; box-shadow: 3px 3px 0 #39343e; }
 .dark button:hover { background: #776985; }
-.dark :is(.template-edit, .archive-edit) { background: transparent; box-shadow: none; color: var(--muted); }
-.dark :is(.template-edit, .archive-edit):hover { background: #45503d; color: var(--night-sage); }
-.dark :is(#archive-no, #pop-no) { color: var(--muted); border-color: var(--night-rule); }
+.dark .template-edit { background: transparent; box-shadow: none; color: var(--muted); }
+.dark .template-edit:hover { background: #45503d; color: var(--night-sage); }
+.dark #archive-no { color: var(--muted); border-color: var(--night-rule); }
 .dark .panel { background: linear-gradient(125deg, #354e44, #293e38); border-color: #729588; }
 .dark .panel::before { border-color: #a5cdb9; }
 .dark .panel.last-session { background: linear-gradient(125deg, #51455c, #3b3344); border-color: #9786a6; }

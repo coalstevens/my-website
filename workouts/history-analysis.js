@@ -19,22 +19,31 @@ const HistoryAnalysis = (() => {
   function name(value) {
     return String(value ?? '').toLowerCase().replace(/\s*--?\s*ss(?:\s*[a-d])?\s*$/i,'').replace(/\s+/g,' ').trim();
   }
-  function records(workouts, edits={}) {
+  function records(workouts, edits={}, currentExercises=[]) {
+    // IDs connect renamed templates; archived titles remain untouched for display.
+    const labels = new Map();
+    for (const workout of [...workouts].sort((a,b)=>a.date.localeCompare(b.date))) {
+      for (const exercise of workout.exercises || []) if (exercise.id) labels.set(exercise.id, name(exercise.name));
+    }
+    for (const exercise of currentExercises) if (exercise.id) labels.set(exercise.id, name(exercise.name));
     const sets=[];
     let unparsed=0;
     for (const workout of workouts) {
       let exercise='';
+      const templates = (workout.exercises || []).flatMap(item => item.values.map(() => item));
       workout.rows.forEach((source,ri)=> {
         const cell=ci=>String(edits[`${workout.id}:${ri}:${ci}`] ?? source[ci] ?? '').trim();
         const title=name(cell(0));
         if (title) exercise=['[unidentified exercise]','session notes'].includes(title) ? '' : title;
+        if (templates[ri]?.id && labels.get(templates[ri].id)) exercise = labels.get(templates[ri].id);
         const values=[cell(2),cell(3)];
         const results=values.map((value,side)=> { const parsed=result(value); return parsed ? {...parsed,side} : null; }).filter(Boolean);
         if (!results.length || !exercise) {
           if (values.some(Boolean)) unparsed++;
           return;
         }
-        sets.push({session:workout.id,date:workout.date,exercise,weight:load(cell(1)),results});
+        sets.push({session:workout.id,date:workout.date,exercise,weight:load(cell(1)),results,
+          ...(templates[ri]?.id ? {exerciseId:templates[ri].id} : {})});
       });
     }
     return {sets,unparsed};
@@ -92,12 +101,13 @@ const HistoryAnalysis = (() => {
       repeaters:row.results.filter(result=>result.kind==='repeaters').map((result,i)=>({value:result.reps*result.seconds,side:result.side ?? i}))
     })));
   }
-  function exerciseSnapshot(sets,label,year = new Date().getFullYear()) {
+  function exerciseSnapshot(sets,label,year = new Date().getFullYear(), exerciseId = null) {
     // The default current-session template has a few presentation-only labels.
     const templateLabels = {'squat':'squats','explosive pull-up':'explosive pullups','lock-off · 90°':'lock offs (90)'};
     const key=name(label);
-    const exercise=Object.hasOwn(templateLabels,key) ? templateLabels[key] : key;
-    const rows=sets.filter(set=>set.exercise===exercise);
+    const identified = exerciseId ? sets.filter(set=>set.exerciseId===exerciseId) : [];
+    const exercise=identified.length ? identified[0].exercise : Object.hasOwn(templateLabels,key) ? templateLabels[key] : key;
+    const rows=identified.length ? identified : sets.filter(set=>set.exercise===exercise);
     const lastDate=rows.reduce((latest,set)=>set.date>latest ? set.date : latest,'');
     return {exercise,sessions:new Set(rows.map(row=>row.session)).size,sessionsThisYear:new Set(rows.filter(row=>row.date.slice(0,4)===String(year)).map(row=>row.session)).size,sets:rows.length,lastDate,...metrics(rows)};
   }
